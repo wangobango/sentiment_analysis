@@ -1,0 +1,3 @@
+# Bachelor's thesis involving sentiment analysis.
+
+Our project consists of 4 people etc etc.. Marcel will finish the rest of it anyway...
