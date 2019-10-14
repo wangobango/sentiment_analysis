@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-import Config from config.py
+from config import Config
 
 
 class Sentence:
@@ -16,7 +16,7 @@ class DataLoader:
 
     def __init__(self):
         self.conf = Config()
-        self.path = conf.readValue('data_path')
+        self.path = self.conf.readValue('data_path')
         self.data = None
 
     def set_path(self, path):
