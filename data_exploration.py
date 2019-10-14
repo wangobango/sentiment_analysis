@@ -15,4 +15,5 @@ if __name__ == "__main__":
     loader.set_path(conf.readValue(PROP))
 
     data = loader.read_xml()
-    print(data)
+    for item in data:
+        pprint(item.toString())

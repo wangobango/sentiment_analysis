@@ -11,6 +11,9 @@ class Sentence:
         self.summary = summary
         self.text = text
 
+    def toString(self):
+        return 'Id: {},\nDomain: {},\nPolarity: {},\nSummary: {},\nText: {} \n'.format(self.id, self.domain, self.polarity, self.summary, self.text)
+
 
 class DataLoader:
 
