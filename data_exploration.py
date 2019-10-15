@@ -7,6 +7,7 @@ import pandas as pd
 
 PROP = "CURRENT_DATA"
 VALUE = "./data/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml"
+PATH = "data_path"
 
 """
 Istnieje już podział klas na tematy. Np książki, muzyka etc... Inne słownictwo wobec różnych tematów? Często występujące frazy/schematy oceniania?
@@ -54,21 +55,28 @@ class Phrase():
 def generateCSV(arr):
     pass
 
-if __name__ == "__main__":
+def parseData():
     loader = DataLoader()
-    # loader.read_xml()
-
     conf = Config()
     conf.addProperty(PROP,VALUE)
+    topics = {}
+    path = conf.readValue(PATH)
 
-    loader.set_path(conf.readValue(PROP))
+    domains = os.listdir(path)
+    print(domains)
+    print(os.listdir(path+domains[0]))
+    # for topic in domains:
+    #     topics[topic] = pd.DataFrame()
+    #     for item in os.listdir(path+topic):
+    #         print(path+topic)
+    #         print(topic)
+    #         realPath = path + topic + "/" + item
+    #         # print(realPath)
+    #         # loader.set_path(realPath)
+    #         # loader.read_xml()
+    #         break
 
-    # data = loader.read_xml()
-    # for item in data:
-    #     pprint(item.toString())
 
-    domains = os.listdir('./data/')
-    for topic in domains:
-        for item in topic:
-            pass
+if __name__ == "__main__":
     # print(conf.readValue('data_path') + domains[0])
+    parseData()

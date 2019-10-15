@@ -14,6 +14,9 @@ class Sentence:
     def toString(self):
         return 'Id: {},\nDomain: {},\nPolarity: {},\nSummary: {},\nText: {} \n'.format(self.id, self.domain, self.polarity, self.summary, self.text)
 
+    def toArray(self):
+        return [self.id, self.domain, self.polarity, self.summary, self.text]
+
 
 class DataLoader:
 
