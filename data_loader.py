@@ -53,8 +53,8 @@ class DataLoader:
         root = tree.getroot()
         for child in root:
             sentences.append(
-                Sentence(child.attrib.get("id"), child.find("domain").text, child.find("polarity").text,
-                         child.find("summary").text, child.find("text").text))
+                Sentence(child.attrib.get("id"), child.find("domain").text.strip(), child.find("polarity").text.strip(),
+                         child.find("summary").text.strip(), child.find("text").text.strip()))
 
         return sentences
 
