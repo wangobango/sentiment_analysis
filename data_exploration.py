@@ -4,11 +4,13 @@ from pprint import pprint
 import os
 import pandas as pd
 import code
+import xml.etree.ElementTree as ET
 
 
 PROP = "CURRENT_DATA"
 VALUE = "./data/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml"
 PATH = "data_path"
+COLUMNS = ["Id", "Domain", "Polarity", "Summmary", "Text"]
 
 """
 Istnieje już podział klas na tematy. Np książki, muzyka etc... Inne słownictwo wobec różnych tematów? Często występujące frazy/schematy oceniania?
@@ -57,10 +59,18 @@ class Phrase():
 class DataExplorer():
     def __init__(self):
         self.config = Config()
+        self.start()
+        self.domains = []
+        self.frames = {}
         pass
 
-    def generateCSV(self,arr):
-        pass
+    def start(self):
+        items = os.listdir('./')
+        if not 'aggregated' in items:
+            os.exec('mkdir aggregated')
+            return True
+        else:
+            return False
 
     def parseData(self):
         loader = DataLoader()
@@ -68,26 +78,59 @@ class DataExplorer():
         topics = {}
         path = self.config.readValue(PATH)
         domains = os.listdir(path)
-        
+        self.domains = domains
+        frames = {}
         """
         Zapisanie każdej domeny do osobnej csv... Sama analiza już na csv'kach
         """
 
         for topic in domains:
-            topics[topic] = pd.DataFrame()
+            topics[topic] = []
             for item in os.listdir(path+topic):
                 realPath = path + topic + "/" + item
                 loader.set_path(realPath)
-                # code.interact(local=locals())
-                print(item)
-                print(realPath)
-                loader.set_path(realPath)
-                loader.read_xml()
-                # topics[topic].append([x.toArray() for x in loader.read_xml()])
-            # break
+                try:
+                    data = loader.read_xml()
+                except ET.ParseError as err:
+                    print(err)
+                    loader.repair_file(err.position[0], err.position[1])
+
+                for sentance in data:
+                    phrase = Phrase(*sentance.toArray())
+                    topics[topic].append(phrase.toDictionary())
+
+                frames[topic] = pd.DataFrame(topics[topic])
+                frames[topic].to_csv('aggregated/'+topic+'.csv')
+
+            self.frames = frames
+
         # code.interact(local=locals())
 
-if __name__ == "__main__":
+    def readData(self):
+        frames = {}
+        path = self.config.readValue(PATH)
+        self.domains = os.listdir(path)
+        for topic in self.domains:
+            for item in os.listdir(path+topic):
+                frames[topic] = pd.read_csv('aggregated/'+topic+'.csv')
 
+        self.frames = frames
+
+    def getFrames(self):
+        return self.frames
+
+
+    def analyzeByDomain(self):
+        pass
+
+if __name__ == "__main__":
     de = DataExplorer()
-    de.parseData()
+    if(de.start()):
+        de.parseData()
+    else:
+        de.readData()
+
+    data = de.getFrames()
+    print('dupa')
+
+    
