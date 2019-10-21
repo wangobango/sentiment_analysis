@@ -3,6 +3,7 @@ from config import Config
 from pprint import pprint
 import os
 import pandas as pd
+import code
 
 
 PROP = "CURRENT_DATA"
@@ -33,6 +34,7 @@ Wnioski:
 
 
 Być może interesująca byłaby agregacja danych nie tylko po temacie, ale np po polaryzacji, albo innym atrybucie jak długość i (w jakiś sposób), badanie korelacji ?
+Określenie zmiennych niezależnych i zależnych 
 
 1. To od czego zacząć? Myślę, że od zgrupowania każdego tematu w jeden plik csv, aby uprościć analizę i nie czytać z wielu plików oddziedzlnie.
 
@@ -52,31 +54,40 @@ class Phrase():
     def toDictionary(self):
         return {"id": self.id, "domain": self.domain, "polarity": self.polarity, "summary": self.summary, "test": self.text}
 
-def generateCSV(arr):
-    pass
+class DataExplorer():
+    def __init__(self):
+        self.config = Config()
+        pass
 
-def parseData():
-    loader = DataLoader()
-    conf = Config()
-    conf.addProperty(PROP,VALUE)
-    topics = {}
-    path = conf.readValue(PATH)
+    def generateCSV(self,arr):
+        pass
 
-    domains = os.listdir(path)
-    print(domains)
-    print(os.listdir(path+domains[0]))
-    # for topic in domains:
-    #     topics[topic] = pd.DataFrame()
-    #     for item in os.listdir(path+topic):
-    #         print(path+topic)
-    #         print(topic)
-    #         realPath = path + topic + "/" + item
-    #         # print(realPath)
-    #         # loader.set_path(realPath)
-    #         # loader.read_xml()
-    #         break
+    def parseData(self):
+        loader = DataLoader()
+        self.config.addProperty(PROP,VALUE)
+        topics = {}
+        path = self.config.readValue(PATH)
+        domains = os.listdir(path)
+        
+        """
+        Zapisanie każdej domeny do osobnej csv... Sama analiza już na csv'kach
+        """
 
+        for topic in domains:
+            topics[topic] = pd.DataFrame()
+            for item in os.listdir(path+topic):
+                realPath = path + topic + "/" + item
+                loader.set_path(realPath)
+                # code.interact(local=locals())
+                print(item)
+                print(realPath)
+                loader.set_path(realPath)
+                loader.read_xml()
+                # topics[topic].append([x.toArray() for x in loader.read_xml()])
+            # break
+        # code.interact(local=locals())
 
 if __name__ == "__main__":
-    # print(conf.readValue('data_path') + domains[0])
-    parseData()
+
+    de = DataExplorer()
+    de.parseData()

@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from config import Config
+import lxml
 
 
 class Sentence:
@@ -32,7 +33,8 @@ class DataLoader:
         if self.path is None:
             return "path is not set!"
         sentences = []
-        tree = ET.parse(self.path)
+        parser = ET.XMLParser(encoding="UTF-8", )
+        tree = ET.parse(self.path, parser=parser)
         root = tree.getroot()
 
         for child in root:
