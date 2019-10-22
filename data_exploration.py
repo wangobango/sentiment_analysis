@@ -14,35 +14,6 @@ VALUE = "./data/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml"
 PATH = "data_path"
 COLUMNS = ["id", "domain", "polarity", "summmary", "text"]
 
-"""
-Istnieje już podział klas na tematy. Np książki, muzyka etc... Inne słownictwo wobec różnych tematów? Często występujące frazy/schematy oceniania?
-
-Na czym ma się tutaj skupiać analiza eksploracyjna ? Mogę zacząć od utworzenia analizy dla każdej klasy. Być może przenieść dane do csv, ale chyba nie trzeba
-Interesujące atrubuty :
-    -polaryzacja tekstu
-    -długość tekstu
-    -długość streszczenia
-    -ilość słów w streszczeniu
-    -średnia polaryzacja tekstu
-    -występowanie znaków specjalnych w tekście? np. &quote
-    
-Wizualizacja:
-    -wykres długości / polaryzacji , czy wypowiedzi nacechowane negatywnie są przeważnie dłuższe czy na odwrót ?
-
-Wnioski:
-    -czy istniej korelacja między długością tekstu a jego polaryzacją ? 
-    -czy istnieje kolrelacja między długością stresZczenia a polaryzacją ?
-    -czy istnieje korelacja między długością streszczenia a długością tekstu ?
-    -czy istnieje związek między tematem tekstu a polaryzacją ? lub długością ?
-    -czy istnieje związek między występowaniem znaków specjalnych a polaryzacją tekstu lub tematem tekstu ? 
-
-
-Być może interesująca byłaby agregacja danych nie tylko po temacie, ale np po polaryzacji, albo innym atrybucie jak długość i (w jakiś sposób), badanie korelacji ?
-Określenie zmiennych niezależnych i zależnych 
-
-1. To od czego zacząć? Myślę, że od zgrupowania każdego tematu w jeden plik csv, aby uprościć analizę i nie czytać z wielu plików oddziedzlnie.
-
-"""
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
@@ -74,7 +45,6 @@ class DataExplorer():
         self.domains = []
         self.frames = {}
         self.analyzedDataByDomain = {}
-        pass
 
     def start(self):
         items = os.listdir('./')
@@ -123,10 +93,7 @@ class DataExplorer():
         counter = 0
         for topic in self.domains:
             frames[topic] = pd.read_csv('aggregated/'+topic+'.csv', delimiter=',')
-            # counter += 1
-            # if(counter == 2):
-            #     break
-
+           
         self.frames = frames
 
     def getFrames(self):
@@ -137,8 +104,9 @@ class DataExplorer():
 
     def setResultsValue(self, results, value, arr, function):
         try:
-            results[value] = function(arr)
+            results[value] = function(arr, results)
         except TypeError as err:
+            results[value] = 'Error'
             print(err)
 
     def analyzeByDomain(self, domain):
@@ -149,25 +117,18 @@ class DataExplorer():
         results = {}
         tokenizer = RegexpTokenizer(r'\w+')
 
-        if(domain == 'Electronics'):
-            print('dupa')
+        self.setResultsValue(results, 'domain', 'domain', lambda x, y: x)
+        self.setResultsValue(results, 'numberOfPositives', arr, lambda arr, results: (arr[:,3] == 'positive').sum())
+        self.setResultsValue(results, 'numberOfNegatives', arr, lambda arr, results: len(arr[:,0]) - results['numberOfPositives'])
+        self.setResultsValue(results, 'positiveToNegativeRatio', arr, lambda arr, results: results['numberOfPositives']/results['numberOfNegatives'] if results['numberOfNegatives'] != 0 else results['numberOfPositives'])
+        self.setResultsValue(results, 'meanTextLengthCharacters', arr, lambda arr, results: np.sum([len(x) for x in arr[:,5]])/len(arr[:,5]))
+        self.setResultsValue(results, 'meanTextLengthWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x)) for x in arr[:,5]])/len(arr[:,5]))
+        self.setResultsValue(results, 'averageTextLengthWhenPolarityPositiveChars', arr, lambda arr, results: np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives'])
+        self.setResultsValue(results, 'averageTextLengthWhenPolarityPositiveWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives'])
+        self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeChars', arr, lambda arr, results: np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'] )
+        self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeChars', arr, lambda arr, results: np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'])
+        self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'])
 
-        # results['domain'] = domain
-
-        self.setResultsValue(results,'domain', 'domain', lambda x: x)
-        results['numberOfPositives'] = (arr[:,3] == 'positive').sum()
-        results['numberOfNegatives'] = len(arr[:,0]) - results['numberOfPositives']
-        results['positiveToNegativeRatio'] =  results['numberOfPositives']/results['numberOfNegatives'] if results['numberOfNegatives'] != 0 else results['numberOfPositives']
-        self.setResultsValue(results,'meanTextLengthCharacters', arr, lambda arr: np.sum([len(x) for x in arr[:,5]])/len(arr[:,5]))
-        # results['meanTextLengthCharacters'] = np.sum([len(x) for x in arr[:,5]])/len(arr[:,5])
-        # results['meanTextLengthWords'] = np.sum([len(tokenizer.tokenize(x)) for x in arr[:,5]])/len(arr[:,5])
-        self.setResultsValue(results, 'meanTextLengthWords', arr, lambda arr: np.sum([len(tokenizer.tokenize(x)) for x in arr[:,5]])/len(arr[:,5]))
-        results['averageTextLengthWhenPolarityPositiveChars'] = np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives']
-        results['averageTextLengthWhenPolarityPositiveWords'] =  np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives']
-        results['averageTextLengthWhenPolarityNegativeChars'] =  np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives']
-        results['averageTextLengthWhenPolarityNegativeWords'] = np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives']
-
-        print(results)
         self.analyzedDataByDomain[domain] = results
 
     def dumpResultsToJSON(self):
@@ -184,8 +145,10 @@ if __name__ == "__main__":
     else:
         de.readData()
 
+    # Initial analysis
     for domain in de.getDomains():
         de.analyzeByDomain(domain)
 
     de.dumpResultsToJSON()
-    
+    # TODO: Visualize results data
+    # TODO: Corrlation analysis - are variables somehow correlated ?
