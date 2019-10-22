@@ -1,16 +1,18 @@
 from data_loader import DataLoader
 from config import Config
 from pprint import pprint
+from nltk.tokenize import RegexpTokenizer
 import os
 import pandas as pd
 import code
 import xml.etree.ElementTree as ET
-
+import numpy as np
+import json
 
 PROP = "CURRENT_DATA"
 VALUE = "./data/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml"
 PATH = "data_path"
-COLUMNS = ["Id", "Domain", "Polarity", "Summmary", "Text"]
+COLUMNS = ["id", "domain", "polarity", "summmary", "text"]
 
 """
 Istnieje już podział klas na tematy. Np książki, muzyka etc... Inne słownictwo wobec różnych tematów? Często występujące frazy/schematy oceniania?
@@ -41,6 +43,16 @@ Określenie zmiennych niezależnych i zależnych
 1. To od czego zacząć? Myślę, że od zgrupowania każdego tematu w jeden plik csv, aby uprościć analizę i nie czytać z wielu plików oddziedzlnie.
 
 """
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NpEncoder, self).default(obj)
 
 class Phrase():
     def __init__(self, id, domain, polarity, summary, text):
@@ -54,23 +66,26 @@ class Phrase():
         return 'Id: {},\nDomain: {},\nPolarity: {},\nSummary: {},\nText: {} \n'.format(self.id, self.domain, self.polarity, self.summary, self.text)
 
     def toDictionary(self):
-        return {"id": self.id, "domain": self.domain, "polarity": self.polarity, "summary": self.summary, "test": self.text}
+        return {"id": self.id, "domain": self.domain, "polarity": self.polarity, "summary": self.summary, "text": self.text}
 
 class DataExplorer():
     def __init__(self):
         self.config = Config()
-        self.start()
         self.domains = []
         self.frames = {}
+        self.analyzedDataByDomain = {}
         pass
 
     def start(self):
         items = os.listdir('./')
         if not 'aggregated' in items:
-            os.exec('mkdir aggregated')
+            os.system('mkdir aggregated')
             return True
         else:
             return False
+
+    def parsePolarityValue(self, value):
+        return 1 if value == 'positive' else 0
 
     def parseData(self):
         loader = DataLoader()
@@ -80,9 +95,6 @@ class DataExplorer():
         domains = os.listdir(path)
         self.domains = domains
         frames = {}
-        """
-        Zapisanie każdej domeny do osobnej csv... Sama analiza już na csv'kach
-        """
 
         for topic in domains:
             topics[topic] = []
@@ -104,24 +116,66 @@ class DataExplorer():
 
             self.frames = frames
 
-        # code.interact(local=locals())
-
     def readData(self):
         frames = {}
         path = self.config.readValue(PATH)
         self.domains = os.listdir(path)
+        counter = 0
         for topic in self.domains:
-            for item in os.listdir(path+topic):
-                frames[topic] = pd.read_csv('aggregated/'+topic+'.csv')
+            frames[topic] = pd.read_csv('aggregated/'+topic+'.csv', delimiter=',')
+            # counter += 1
+            # if(counter == 2):
+            #     break
 
         self.frames = frames
 
     def getFrames(self):
         return self.frames
 
+    def getDomains(self):
+        return self.domains
 
-    def analyzeByDomain(self):
-        pass
+    def setResultsValue(self, results, value, arr, function):
+        try:
+            results[value] = function(arr)
+        except TypeError as err:
+            print(err)
+
+    def analyzeByDomain(self, domain):
+        data = self.getFrames()
+        topic = data[domain]
+        arr = topic.to_numpy()
+
+        results = {}
+        tokenizer = RegexpTokenizer(r'\w+')
+
+        if(domain == 'Electronics'):
+            print('dupa')
+
+        # results['domain'] = domain
+
+        self.setResultsValue(results,'domain', 'domain', lambda x: x)
+        results['numberOfPositives'] = (arr[:,3] == 'positive').sum()
+        results['numberOfNegatives'] = len(arr[:,0]) - results['numberOfPositives']
+        results['positiveToNegativeRatio'] =  results['numberOfPositives']/results['numberOfNegatives'] if results['numberOfNegatives'] != 0 else results['numberOfPositives']
+        self.setResultsValue(results,'meanTextLengthCharacters', arr, lambda arr: np.sum([len(x) for x in arr[:,5]])/len(arr[:,5]))
+        # results['meanTextLengthCharacters'] = np.sum([len(x) for x in arr[:,5]])/len(arr[:,5])
+        # results['meanTextLengthWords'] = np.sum([len(tokenizer.tokenize(x)) for x in arr[:,5]])/len(arr[:,5])
+        self.setResultsValue(results, 'meanTextLengthWords', arr, lambda arr: np.sum([len(tokenizer.tokenize(x)) for x in arr[:,5]])/len(arr[:,5]))
+        results['averageTextLengthWhenPolarityPositiveChars'] = np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives']
+        results['averageTextLengthWhenPolarityPositiveWords'] =  np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives']
+        results['averageTextLengthWhenPolarityNegativeChars'] =  np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives']
+        results['averageTextLengthWhenPolarityNegativeWords'] = np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives']
+
+        print(results)
+        self.analyzedDataByDomain[domain] = results
+
+    def dumpResultsToJSON(self):
+        path = self.config.readValue('results_path')
+        with open(path, "a") as f:
+            json.dump(self.analyzedDataByDomain, f, cls=NpEncoder)
+        
+
 
 if __name__ == "__main__":
     de = DataExplorer()
@@ -130,7 +184,8 @@ if __name__ == "__main__":
     else:
         de.readData()
 
-    data = de.getFrames()
-    print('dupa')
+    for domain in de.getDomains():
+        de.analyzeByDomain(domain)
 
+    de.dumpResultsToJSON()
     
