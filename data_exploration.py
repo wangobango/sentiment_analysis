@@ -106,7 +106,7 @@ class DataExplorer():
         try:
             results[value] = function(arr, results)
         except TypeError as err:
-            results[value] = 'Error'
+            results[value] = 'error? but whyyyy'
             print(err)
 
     def analyzeByDomain(self, domain):
@@ -152,3 +152,4 @@ if __name__ == "__main__":
     de.dumpResultsToJSON()
     # TODO: Visualize results data
     # TODO: Corrlation analysis - are variables somehow correlated ?
+    # TODO: Difference in results between different domains
