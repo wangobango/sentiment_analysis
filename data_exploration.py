@@ -2,6 +2,7 @@ from data_loader import DataLoader
 from config import Config
 from pprint import pprint
 from nltk.tokenize import RegexpTokenizer
+from console_progressbar import ProgressBar
 import matplotlib
 import matplotlib.pyplot as plt
 import os
@@ -109,10 +110,17 @@ class DataExplorer():
             results[value] = function(arr, results)
         except TypeError as err:
             results[value] = 21.37
-            print(err)
+            if '-debug' in sys.argv:
+                print(err)
 
     def countCapitalLetters(self, string):
         return sum(1 for c in string if c.isupper())
+
+    def analyzeAllDomains(self):
+        pb = ProgressBar(total=int(len(self.domains)-1),prefix='Domain analysis in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
+        for idx,domain in enumerate(self.getDomains()):
+            pb.print_progress_bar(idx)
+            self.analyzeByDomain(domain)
 
     def analyzeByDomain(self, domain):
         data = self.getFrames()
@@ -206,8 +214,7 @@ if __name__ == "__main__":
         de.readData()
 
     # Initial analysis
-    for domain in de.getDomains():
-        de.analyzeByDomain(domain)
+    de.analyzeAllDomains()
 
     if("-dump" in sys.argv):
         de.dumpResultsToJSON()
