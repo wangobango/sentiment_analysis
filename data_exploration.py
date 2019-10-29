@@ -93,7 +93,6 @@ class DataExplorer():
         frames = {}
         path = self.config.readValue(PATH)
         self.domains = os.listdir(path)
-        counter = 0
         for topic in self.domains:
             frames[topic] = pd.read_csv('aggregated/'+topic+'.csv', delimiter=',')
            
@@ -109,7 +108,7 @@ class DataExplorer():
         try:
             results[value] = function(arr, results)
         except TypeError as err:
-            results[value] = 'error? but whyyyy'
+            results[value] = 2137
             print(err)
 
     def countCapitalLetters(self, string):
@@ -153,19 +152,46 @@ class DataExplorer():
         return json.loads(path)
 
     class PlotPresentation:
-        def __init__(self, parent, data):
-            self.data = data
+        def __init__(self, parent):
             self.parent = parent
+            matplotlib.use('Agg')
+
+        def autolabel(self, rects, ax):
+            """Attach a text label above each bar in *rects*, displaying its height."""
+            for rect in rects:
+                height = rect.get_height()
+                ax.annotate('{}'.format(height),
+                            xy=(rect.get_x() + rect.get_width() / 2, height),
+                            xytext=(0, 3),  # 3 points vertical offset
+                            textcoords="offset points",
+                            ha='center', va='bottom')
 
         def plotTextLengthByDomain(self):
             labels = self.parent.domains
             negativeMeans = [self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityNegativeWords'] for x in labels]
             positiveMeans = [self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityPositiveWords'] for x in labels]
+            x = np.arange(len(labels))
+            width = 0.35
 
-            pass
+            fig, ax = plt.subplots()
+            rects1 = ax.bar(x - width/2, negativeMeans, width, label='Mean Positive Length')
+            rects2 = ax.bar(x + width/2, positiveMeans, width, label='Mean Negative Length')
+
+            ax.set_ylabel('Domains')
+            ax.set_title('Mean positive and negative text length by domain')
+            ax.set_xticks(x)
+            ax.set_xticklabels(labels)
+            ax.legend()
+
+            self.autolabel(rects1, ax)
+            self.autolabel(rects2, ax)
+
+            fig.tight_layout()
+            plt.show()
+
 
     def preparePlotPresentation(self):
-        pp = self.PlotPresentation(self.analyzedDataByDomain)
+        pp = self.PlotPresentation(self)
         pp.plotTextLengthByDomain()
 
 if __name__ == "__main__":
@@ -184,8 +210,6 @@ if __name__ == "__main__":
 
     if("-plot" in sys.argv):
         de.preparePlotPresentation()
-
-
 
     # TODO: Visualize results data
     # TODO: Corrlation analysis - are variables somehow correlated ?
