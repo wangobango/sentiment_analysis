@@ -2,12 +2,15 @@ from data_loader import DataLoader
 from config import Config
 from pprint import pprint
 from nltk.tokenize import RegexpTokenizer
+import matplotlib
+import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import code
 import xml.etree.ElementTree as ET
 import numpy as np
 import json
+import sys
 
 PROP = "CURRENT_DATA"
 VALUE = "./data/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml"
@@ -109,6 +112,9 @@ class DataExplorer():
             results[value] = 'error? but whyyyy'
             print(err)
 
+    def countCapitalLetters(self, string):
+        return sum(1 for c in string if c.isupper())
+
     def analyzeByDomain(self, domain):
         data = self.getFrames()
         topic = data[domain]
@@ -128,15 +134,39 @@ class DataExplorer():
         self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeChars', arr, lambda arr, results: np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'] )
         self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeChars', arr, lambda arr, results: np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'])
         self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'])
+        self.setResultsValue(results, 'averageNumberOfCapitalLettersPolarityPositive', arr, lambda arr, results: np.sum([self.countCapitalLetters(x[2]) for x in arr[:,3:6] if x[0] == 'positive'])/ results['numberOfPositives'])
+        self.setResultsValue(results, 'averageNumberOfCapitalLettersPolarityNegative', arr, lambda arr, results: np.sum([self.countCapitalLetters(x[2]) for x in arr[:,3:6] if x[0] == 'negative'])/ results['numberOfNegatives'])
 
         self.analyzedDataByDomain[domain] = results
 
     def dumpResultsToJSON(self):
         path = self.config.readValue('results_path')
-        with open(path, "a") as f:
+        with open(path, "w") as f:
             json.dump(self.analyzedDataByDomain, f, cls=NpEncoder)
         
+    """
+    TODO
+    Needs fix - at this point raises JSON.DecodeError
+    """
+    def loadResultsFromJson(self):
+        path = self.config.readValue('results_path')
+        return json.loads(path)
 
+    class PlotPresentation:
+        def __init__(self, parent, data):
+            self.data = data
+            self.parent = parent
+
+        def plotTextLengthByDomain(self):
+            labels = self.parent.domains
+            negativeMeans = [self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityNegativeWords'] for x in labels]
+            positiveMeans = [self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityPositiveWords'] for x in labels]
+
+            pass
+
+    def preparePlotPresentation(self):
+        pp = self.PlotPresentation(self.analyzedDataByDomain)
+        pp.plotTextLengthByDomain()
 
 if __name__ == "__main__":
     de = DataExplorer()
@@ -149,7 +179,15 @@ if __name__ == "__main__":
     for domain in de.getDomains():
         de.analyzeByDomain(domain)
 
-    de.dumpResultsToJSON()
+    if("-dump" in sys.argv):
+        de.dumpResultsToJSON()
+
+    if("-plot" in sys.argv):
+        de.preparePlotPresentation()
+
+
+
     # TODO: Visualize results data
     # TODO: Corrlation analysis - are variables somehow correlated ?
     # TODO: Difference in results between different domains
+
