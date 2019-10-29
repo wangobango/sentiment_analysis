@@ -108,7 +108,7 @@ class DataExplorer():
         try:
             results[value] = function(arr, results)
         except TypeError as err:
-            results[value] = 2137
+            results[value] = 21.37
             print(err)
 
     def countCapitalLetters(self, string):
@@ -151,6 +151,10 @@ class DataExplorer():
         path = self.config.readValue('results_path')
         return json.loads(path)
 
+    def preparePlotPresentation(self):
+            pp = self.PlotPresentation(self)
+            pp.plotTextLengthByDomain()
+
     class PlotPresentation:
         def __init__(self, parent):
             self.parent = parent
@@ -169,8 +173,8 @@ class DataExplorer():
 
         def plotTextLengthByDomain(self):
             labels = self.parent.domains
-            negativeMeans = [self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityNegativeWords'] for x in labels]
-            positiveMeans = [self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityPositiveWords'] for x in labels]
+            negativeMeans = [int(self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityNegativeWords']) for x in labels]
+            positiveMeans = [int(self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityPositiveWords']) for x in labels]
             x = np.arange(len(labels))
             width = 0.35
 
@@ -188,13 +192,11 @@ class DataExplorer():
             self.autolabel(rects2, ax)
 
             fig.tight_layout()
-            # plt.show()
             plt.savefig(self.plotPath+'mean_positive_negative_by_domain.png')
+            plt.show()
 
 
-    def preparePlotPresentation(self):
-        pp = self.PlotPresentation(self)
-        pp.plotTextLengthByDomain()
+        
 
 if __name__ == "__main__":
     de = DataExplorer()
