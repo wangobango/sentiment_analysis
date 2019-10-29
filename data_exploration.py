@@ -154,7 +154,8 @@ class DataExplorer():
     class PlotPresentation:
         def __init__(self, parent):
             self.parent = parent
-            matplotlib.use('Agg')
+            self.plotPath = self.parent.config.readValue('plot_path')
+            # matplotlib.use('Agg')
 
         def autolabel(self, rects, ax):
             """Attach a text label above each bar in *rects*, displaying its height."""
@@ -187,7 +188,8 @@ class DataExplorer():
             self.autolabel(rects2, ax)
 
             fig.tight_layout()
-            plt.show()
+            # plt.show()
+            plt.savefig(self.plotPath+'mean_positive_negative_by_domain.png')
 
 
     def preparePlotPresentation(self):
