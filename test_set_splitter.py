@@ -2,6 +2,7 @@ import pandas as pd
 from config import Config
 import os
 import glob
+import sys
 
 PATH = "aggregated_path"
 TEST_SET_PATH = "test_set_path"
@@ -88,6 +89,22 @@ class Test_set_splitter:
         test_set.to_csv(self.test_set_path, index = False)
         data_set.to_csv(self.data_set_path, index = False)
 
-if __name__ == "__main__":
+def main():
+    ifLog = True if "--log" in os.sys.argv else False
     splitter = Test_set_splitter()
-    splitter.splitAll()
+
+    if ("--append" in os.sys.argv):
+        index = os.sys.argv.index("--append")
+        try:
+            path_to_file_to_append = os.sys.argv[index + 1]
+        except:
+            print("You passed something wrong with arguments. Format is: [--log] [--append 'path_to_file']")
+            return
+
+        splitter.splitAndAppendToExisting(path_to_file_to_append)
+
+    else:
+        splitter.splitAll(ifLog)
+
+if __name__ == "__main__":
+    main()
