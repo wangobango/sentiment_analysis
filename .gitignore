@@ -2,3 +2,5 @@
 data
 __pycache*
 aggregated/*.csv
+plots/*
+results.json
