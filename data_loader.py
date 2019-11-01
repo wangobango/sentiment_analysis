@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from config import Config
+import lxml
 
 
 class Sentence:
@@ -15,6 +16,9 @@ class Sentence:
         return 'Id: {},\nDomain: {},\nPolarity: {},\nSummary: {},\nText: {} \n'.format(self.id, self.domain,
                                                                                        self.polarity, self.summary,
                                                                                        self.text)
+
+    def toArray(self):
+        return [self.id, self.domain, self.polarity, self.summary, self.text]
 
 
 class DataLoader:
