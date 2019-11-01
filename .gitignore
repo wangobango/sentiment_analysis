@@ -4,3 +4,5 @@ test_set
 data_set
 __pycache*
 aggregated/*.csv
+plots/*
+results.json
