@@ -161,7 +161,7 @@ class DataExplorer():
         self.setResultsValue(results, 'averageTextLengthWhenPolarityPositiveChars', arr, lambda arr, results: np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives'])
         self.setResultsValue(results, 'averageTextLengthWhenPolarityPositiveWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives'])
         self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeChars', arr, lambda arr, results: np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'] )
-        self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeChars', arr, lambda arr, results: np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'])
+        self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'])
         self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'])
         self.setResultsValue(results, 'averageNumberOfCapitalLettersPolarityPositive', arr, lambda arr, results: np.sum([self.countCapitalLetters(x[2]) for x in arr[:,3:6] if x[0] == 'positive'])/ results['numberOfPositives'])
         self.setResultsValue(results, 'averageNumberOfCapitalLettersPolarityNegative', arr, lambda arr, results: np.sum([self.countCapitalLetters(x[2]) for x in arr[:,3:6] if x[0] == 'negative'])/ results['numberOfNegatives'])

@@ -6,3 +6,5 @@ __pycache*
 aggregated/*.csv
 plots/*
 results.json
+absa_data/*
+.idea/*
