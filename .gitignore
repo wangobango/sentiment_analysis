@@ -6,3 +6,4 @@ __pycache*
 aggregated/*.csv
 plots/*
 results.json
+*.pickle
