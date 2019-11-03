@@ -18,6 +18,13 @@ Download the required data sets, unzip them and store the results in ```data``` 
 # Test_set_splitter
 Component whose job is to split the data into test set and data set. The test set will later be used to validate and rank the analysis approaches used.
 
+It is mandatory to first use:
+```
+python3 data_exploration
+```
+
+To aggregate data in ```aggregated``` directory.
+
 ## Usage
 The component consists of a class Test_set_splitter and it's public methods:
 `SplitAll()` and `SplitAndAppendToExisting()`
@@ -60,3 +67,20 @@ python3 test_set_splitter --append [path_to_file]
 
 ## Known issues:
   * 1# at this point ```results``` analysis sometimes crashes. This exception is then caught and ```21.37``` value is saved to results temoporarly
+
+# Baseline models
+This model uses linear regression, as well as SGD to calculate loss function. 
+## Mean length of text based model
+
+### Prerequisites
+  - have generated ```test_set``` and ```data_set```
+
+### Usage
+To teach model and save it to binary file for later use, type :
+```
+python3 mean_length_baseline.py -teach
+```
+To evaluate the model on a test set:
+```
+python3 mean_length_baseline.py -evaluate
+```
