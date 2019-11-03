@@ -30,8 +30,12 @@ class Test_set_splitter:
         nrows = dataFrame.shape[0]
 
         n_test_set_rows = int(nrows * self.test_set_fraction)
+        half_n_test_set_rows = n_test_set_rows//2
 
-        return dataFrame[:n_test_set_rows], dataFrame[n_test_set_rows:]
+        test_set_part = pd.concat([dataFrame[:half_n_test_set_rows], dataFrame[-half_n_test_set_rows:]])
+        data_set_part = dataFrame[half_n_test_set_rows:-half_n_test_set_rows]
+        # return dataFrame[:n_test_set_rows], dataFrame[n_test_set_rows:]
+        return test_set_part, data_set_part
     
     ###
     # splits all files in self.data_folder_path to test_set and data_set
