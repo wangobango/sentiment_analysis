@@ -13,12 +13,12 @@ class Dictionary:
         Output : "positive" or "negative"
     """
 
-    def get_word_polarity(self, word):
+    def get_word_polarity(self, word, log=True):
         value = "empty"
         try:
             value = self.sn.polarity_value(word.lower())
         except:
-            print('An error occurred. Word: ' + word + 'is not known.')
+            if log: print('An error occurred. Word: ' + word + ' is not known.')
 
         return value
 
@@ -27,11 +27,11 @@ class Dictionary:
         Output : Int [-1 : 1]    
     """
 
-    def get_word_polarity_numerical_value(self, word):
+    def get_word_polarity_numerical_value(self, word, log=True):
         value = "empty"
         try:
             value = self.sn.polarity_intense(word.lower())
         except:
-            print('An error occurred. Word: ' + word + 'is not known.')
+            if log: print('An error occurred. Word: ' + word + ' is not known.')
         return value
 
