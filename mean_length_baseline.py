@@ -11,6 +11,7 @@ from sklearn.linear_model import SGDClassifier
 from nltk.tokenize import RegexpTokenizer
 from scipy.sparse import csr_matrix
 from joblib import dump, load
+from sklearn.svm import SVC
 
 class MeanLengthBaseLine:
   def __init__(self):
@@ -46,7 +47,7 @@ class MeanLengthBaseLine:
         return sum(1 for c in string if c.isupper())
 
   def teachLinearRegressionModel(self):
-    self.lr = SGDClassifier(verbose=1, penalty='elasticnet')
+    self.lr = SGDClassifier(verbose=1)
     tokenizer = RegexpTokenizer(r'\w+')
     count = lambda l1, l2: len(list(filter(lambda c: c in l2, l1)))
     
@@ -54,7 +55,7 @@ class MeanLengthBaseLine:
     capitalLettersData = np.array([self.countCapitalLetters(x) for idx, x in enumerate(self.dataSet['text']) if idx not in self.corruptedData['data']])
     punctuationMarksData = np.array([count(x, string.punctuation) for idx, x in enumerate(self.dataSet['text']) if idx not in self.corruptedData['data'] ])
     
-    features = np.array([lenData])
+    features = np.array([ lenData ])
     yData = np.array([[1 if x == 'positive' else 0 for idx, x in enumerate(self.dataSet['polarity']) if idx not in self.corruptedData['data']]])
     size = yData.size
     features = np.reshape(features, (size, 1))
@@ -81,7 +82,7 @@ class MeanLengthBaseLine:
     capitalLettersData = np.array([self.countCapitalLetters(x) for idx, x in enumerate(self.testSet['text']) if idx not in self.corruptedData['test']])
     punctuationMarksData = np.array([count(x, string.punctuation) for idx, x in enumerate(self.testSet['text']) if idx not in self.corruptedData['test'] ])
     
-    features = np.array([lenData])
+    features = np.array([ lenData ])
     correctPredictions = np.array([[1 if x == 'positive' else 0 for idx, x in enumerate(self.testSet['polarity']) if idx not in self.corruptedData['test']]])  
     
     features = np.reshape(features, (correctPredictions.size, 1))
