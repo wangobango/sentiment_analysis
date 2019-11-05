@@ -1,5 +1,6 @@
 from sklearn import metrics
 import numpy as np
+import pandas as pd
 
 class Evaluator:
     # 0,0 TN
@@ -12,7 +13,7 @@ class Evaluator:
     ACCURACY = 'accuracy'
     C_MATRIX = 'confusion-matrix'
 
-    def evaluate(self, expectedResults, actualResults):
+    def evaluate(self, expectedResults, actualResults, printConfusionMatrix = False):
         evaluatedMetircs = {}
         confusionMatrix = self.calculate_confusion_matrix(expectedResults, actualResults)
         # evaluatedMetircs[self.C_MATRIX] = confusionMatrix.flatten()
@@ -20,7 +21,7 @@ class Evaluator:
         evaluatedMetircs[self.PRECISION] = self.calculate_precision()
         evaluatedMetircs[self.RECALL] = self.calculate_recall()
         evaluatedMetircs[self.FSCORE] = self.calculate_fscore(evaluatedMetircs[self.PRECISION], evaluatedMetircs[self.RECALL])
-        self.print(evaluatedMetircs)
+        self.print(evaluatedMetircs, printConfusionMatrix)
         return evaluatedMetircs
 
     def calculate_precision(self):
@@ -41,12 +42,17 @@ class Evaluator:
         self.tn = confusionMatrix[0][0]
         self.fn = confusionMatrix[1][0]
         self.fp = confusionMatrix[0][1]
+        self.confusionMatrix = confusionMatrix
         return confusionMatrix
 
-    def print(self, evaluatedMetrics):
+    def print(self, evaluatedMetrics, printConfusionMatrix):
         text = ""
         for i, item in enumerate(evaluatedMetrics.items()):
             if i > 0:
                 text += "\t" if i % 2 == 0 else "\n"
             text += str(item[0]) + ": " + str(item[1])
         print(text)
+        
+        if (printConfusionMatrix):
+            print("True positives: {}\tTrue negatives: {}\nFalse positives: {}\tFalse negatives: {}".format(self.tp, self.tn, self.fp, self.fn))
+            

@@ -14,6 +14,9 @@
 import requests
 import pandas as pd
 import threading
+from data_evaluator import Evaluator
+import time
+# export PYTHONPATH="$PYTHONPATH:$HOME/Ubuntu/sentiment_analysis/" to get data_evaluator until Ramon makes it work
 
 class DeepAi:
     def __init__(self, path_to_data):
@@ -21,9 +24,6 @@ class DeepAi:
         self.dataFrame = pd.read_csv(path_to_data)
         self.dataFrame.drop(self.dataFrame.columns[0], axis=1, inplace=True)
         self.nrows = self.dataFrame.shape[0]
-
-    def readLineFromDataFrame(self, numLine):
-        return self.dataFrame.iloc[numLine]
 
     def postToApi(self, text_string):
         print("postingToApi")
@@ -35,22 +35,30 @@ class DeepAi:
             headers={'api-key': '32f60ff7-bd13-4c98-8bdc-b5e71b93e067'}
         )
         json = r.json()
-        print(json)
-        return [x.lower() for x in json['output']]
+        try:
+            return [x.lower() for x in json['output']]
+        except:
+            raise Exception('ERROR: {}, text_string: {}'.format(json, text_string))
 
     # prepares text for sending through API. This means replacing every dot with ";" as the engine analyzes each sentence separately
     def prepareText(self, text_string):
         return text_string.replace(".", ";")[:-1]
 
     def getSentimentForLine(self, numLine):
-        line = self.readLineFromDataFrame(numLine)
+        line = self.dataFrame.iloc[numLine]
         text = line['text']
-        text = self.prepareText(text)
+        # text = self.prepareText(text)
         
         csvSentiment = line['polarity']
-        apiSentiment = self.postToApi(text)
-        
-        print(csvSentiment, apiSentiment)
+        apiSentiments = self.postToApi(text)
+        print(apiSentiments)
+
+        apiSentiments = ['positive' if (x == 'verypositive' or x == 'positive') else 'negative' if (x == 'verynegative' or x == 'negative') else 'neutral' for x in apiSentiments]
+        print(apiSentiments)
+
+        apiSentiment = 'positive' if (apiSentiments.count('positive') >= apiSentiments.count('negative')) else 'negative'
+
+        print("DeepAi::getSentimentForLine: csvSentiment = {}, apiSentiment = {}".format(csvSentiment, apiSentiment))
         return csvSentiment, apiSentiment
 
     def getSentimentForMultipleLines(self, numLines):
@@ -69,53 +77,40 @@ class DeepAi:
         return csvSentiments, apiSentiments
 
 
-    def worker(self, i, outputList):
-        print("Working on line: {}".format(i))
+    def worker(self, workerNum, lineNumToTest, expectedList, actualList):
+        print("{}: Working on line: {}".format(workerNum, lineNumToTest))
         try:
-            csvSentiment, apiSentiment = self.getSentimentForLine(i)
-        except:
-            outputList[i] = 'error'
-            return
-        
-        if (apiSentiment == "verynegative"): apiSentiment = "negative"
-        elif (apiSentiment == "verypositive"): apiSentiment = "positive"
-        elif (apiSentiment == "neutral"):
-            outputList[i] = 'neutral'
-            return
+            # csvSentiment, apiSentiment in outputList
+            expectedList[workerNum], actualList[workerNum] = self.getSentimentForLine(lineNumToTest)
+        except Exception as error:
+            expectedList[workerNum] = 'error'
+            actualList[workerNum] = 'error'
+            print("{}: ERROR ON LINE: {}. Error message: {}".format(workerNum, lineNumToTest, error))
 
-        same = True if csvSentiment == apiSentiment else False
-        if (same):
-            outputList[i] = 'true'
-        else:
-            outputList[i] = 'false'
-
-        print("Did line {} match? {}".format(i, same))
         return
 
-    def runParallel(self):
+    def runParallelForLines(self, lineNumbers):
         threads = []
-        outputList = [0 for x in range(200)]
-        for i in range(0,200):
-            t = threading.Thread(target=self.worker, args=(i, outputList))
+        expectedList = [0 for x in range(len(lineNumbers))]
+        actualList = [0 for x in range(len(lineNumbers))]
+        
+        for i in range(0,len(lineNumbers)):
+            t = threading.Thread(target=self.worker, args=(i, lineNumbers[i], expectedList, actualList))
             threads.append(t)
             t.start()
 
         for t in threads:
             t.join()
-
-        same = outputList.count('true')
-        different = outputList.count('false')
-        errors = outputList.count('error')
-        neutrals = outputList.count('neutral')
-        print("Num of same: {}\nNum of diff: {}\nNum of errors: {}\nNum of neutrals: {}".format(same, different, errors, neutrals))
-        return
         
+
+        return expectedList, actualList
+        
+    # deprecated - will be removed in the future
     def getStatisticsForLines(self, list_of_numLines):
         lenAllLines = len(list_of_numLines)
         numOfTrues = 0
         numOfErrors = 0
         numOfNeutrals = 0
-
 
         for i, numLine in enumerate(list_of_numLines):
             try:
@@ -141,22 +136,38 @@ class DeepAi:
 
 def main():
     deepAi = DeepAi("./test_set/test_set.csv")
-    # deepAi.runParallel()
-    # return
+    evaluator = Evaluator()
     
-    for i in range(0,29):
-        line = deepAi.dataFrame.iloc[i]
-        text = line['text']
-        print("i = {}, text = {}".format(i, text))
+    numbersToCheck = list(range(0,164))
+    
+    expectedList = []
+    actualList = []
+    startTime = time.time()
+    for i in range(2):
+        expectedListTemp, actualListTemp = deepAi.runParallelForLines(numbersToCheck[i*80:i*80 + 80])
+        expectedList = expectedList + expectedListTemp
+        actualList = actualList + actualListTemp
+    
+    stopTime = time.time()
+    tp = 0
+    tn = 0
+    fn = 0
+    fp = 0
+    for i in range (len(expectedList)):
+        if (expectedList[i] == actualList[i] and expectedList[i] == 'positive'): tp = tp + 1
+        elif (expectedList[i] == actualList[i] and expectedList[i] == 'negative'): tn = tn + 1
+        elif (expectedList[i] == 'positive' and actualList[i] == 'negative'): fn = fn + 1
+        elif (expectedList[i] == 'negative' and actualList[i] == 'positive'): fp = fp + 1 
 
-        text = deepAi.prepareText(text)
-        print("i = {}, prepared text = {}\n".format(i, text))
+    expectedListWithoutErrors = [x for x in expectedList if x != 'error']
+    actualListWithoutErrors = [x for x in actualList if x != 'error']
+
+    numOfErrors = len(expectedList) - len(expectedListWithoutErrors)
+    timeItTook = stopTime - startTime
+
+    evaluator.evaluate(expectedListWithoutErrors, actualListWithoutErrors, printConfusionMatrix=True)
+    print("tp = {}, tn = {}, fp = {}, fn = {}, num of errors = {}, it took {}s".format(tp, tn, fp, fn, numOfErrors, timeItTook))
     return
-    # numbersToCheck = list(range(0, 10)) + list(range(299000, 299010))
-    numbersToCheck = list(range(0,29))
-    deepAi.getSentimentForMultipleLines(numbersToCheck)
-    # deepAi.getStatisticsForLines(numbersToCheck)
-
 
 if __name__ == "__main__":
     main()
