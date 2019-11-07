@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from config import Config
+from .config import Config
 import lxml
 
 

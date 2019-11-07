@@ -1,5 +1,5 @@
 import pandas as pd
-from config import Config
+from .config import Config
 import os
 import glob
 import sys

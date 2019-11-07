@@ -1,5 +1,5 @@
-from data_loader import DataLoader
-from config import Config
+from .data_loader import DataLoader
+from .config import Config
 from pprint import pprint
 from nltk.tokenize import RegexpTokenizer
 from console_progressbar import ProgressBar
