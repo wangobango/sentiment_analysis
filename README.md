@@ -20,7 +20,7 @@ Component whose job is to split the data into test set and data set. The test se
 
 It is mandatory to first use:
 ```
-python3 data_exploration
+python3 -m utils.data_exploration
 ```
 
 To aggregate data in ```aggregated``` directory.
@@ -33,17 +33,17 @@ To use them, the data needs to be in .csv format in folder `aggregated`. The com
 
 To split all data use:
 ```
-python3 test_set_splitter
+python3 -m utils.test_set_splitter
 ```
 
 To get more verbose information use:
 ```
-python3 test_set_splitter --log
+python3 -m utils.test_set_splitter --log
 ```
 
 To append new data to existing sets use:
 ```
-python3 test_set_splitter --append [path_to_file]
+python3 -m utils.test_set_splitter --append [path_to_file]
 ```
 
 # Data exploration
@@ -78,9 +78,9 @@ This model uses linear regression, as well as SGD to calculate loss function.
 ### Usage
 To teach model and save it to binary file for later use, type :
 ```
-python3 mean_length_baseline.py -teach
+python3 -m baselines.mean_length_baseline -teach
 ```
 To evaluate the model on a test set:
 ```
-python3 mean_length_baseline.py -evaluate
+python3 -m baselines.mean_length_baseline -evaluate
 ```

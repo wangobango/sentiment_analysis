@@ -5,8 +5,8 @@ import pickle
 import os
 import sys
 import string
-from config import Config
-from data_evaluator import Evaluator
+from utils.config import Config
+from utils.data_evaluator import Evaluator
 from sklearn.linear_model import SGDClassifier
 from nltk.tokenize import RegexpTokenizer
 from scipy.sparse import csr_matrix
