@@ -1,5 +1,5 @@
-from data_loader import DataLoader
-from config import Config
+from .data_loader import DataLoader
+from .config import Config
 from pprint import pprint
 from nltk.tokenize import RegexpTokenizer
 from console_progressbar import ProgressBar
@@ -72,7 +72,7 @@ class DataExplorer():
         self.domains = domains
         frames = {}
 
-        for topic in domains:
+        for idx, topic in enumerate(domains):
             topics[topic] = []
             for item in os.listdir(path+topic):
                 realPath = path + topic + "/" + item
@@ -90,6 +90,7 @@ class DataExplorer():
 
                 frames[topic] = pd.DataFrame(topics[topic])
                 frames[topic].to_csv('aggregated/'+topic+'.csv')
+                print("Done topic: {}, {} / {}".format(topic, idx, len(domains)))
 
             self.frames = frames
 

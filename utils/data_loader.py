@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from config import Config
+from .config import Config
 import lxml
 
 
@@ -43,9 +43,26 @@ class DataLoader:
                 continue
             fout.write(line)
 
+    def repair_encoding(self):
+        fin = open(self.path, "r").readlines()
+        fout = open(self.path, "w")
+        for line in fin:
+            fout.write(self.repair_text(line))
+
+    def repair_text(self, text):
+        text = text.replace("&amp;amp;", "&amp;")
+        text = text.replace("&amp;eacute;", "&eacute;")
+        text = text.replace("&amp;quot;", "&quot;")
+        text = text.replace("&amp;lt;", "&lt;")
+        text = text.replace("&amp;#34;", "&quot;")
+        text = text.replace("&amp;aacute;", "&aacute;;")
+        text = text.replace("&amp;gt;", "&gt;")
+        return text
+
     def read_xml(self):
         if self.path is None:
             raise Exception("path is not set!")
+        self.repair_encoding()
         sentences = []
         parser = ET.XMLParser(encoding="utf-8")
 
@@ -70,14 +87,16 @@ class DataLoader:
 # def main():
 #     data_loader = DataLoader()
 #     data_loader.set_path(
-#         '/home/jacek/Downloads/inzynierka/projekt/datasets/dranziera_protocol/Amazon_Instant_Video/Amazon_Instant_Video.neg.1.xml')
+#         '/home/jacek/Downloads/inzynierka/projekt/datasets/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml')
 #
-#     try:
-#         data_loader.read_xml()
-#     except ET.ParseError as err:
-#         print(err)
-#         data_loader.repair_file(err.position[0], err.position[1])
-#
-#
+#     data_loader.repair_encoding()
+
+    # try:
+    #     data_loader.read_xml()
+    # except ET.ParseError as err:
+    #     print(err)
+    #     data_loader.repair_file(err.position[0], err.position[1])
+
+
 # if __name__ == "__main__":
 #     main()
