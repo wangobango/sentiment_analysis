@@ -26,7 +26,6 @@ class DataLoader:
     def __init__(self):
         self.conf = Config()
         self.path = self.conf.readValue('data_path')
-        self.path = ""
         self.data = None
 
     def set_path(self, path):
