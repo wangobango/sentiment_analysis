@@ -14,7 +14,7 @@
 import requests
 import pandas as pd
 import threading
-from data_evaluator import Evaluator
+from utils.data_evaluator import Evaluator
 import time
 # export PYTHONPATH="$PYTHONPATH:$HOME/Ubuntu/sentiment_analysis/" to get data_evaluator until Ramon makes it work
 
