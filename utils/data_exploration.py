@@ -70,7 +70,9 @@ class DataExplorer():
         path = self.config.readValue(PATH)
         domains = os.listdir(path)
         self.domains = domains
+        pb = ProgressBar(total=int(len(self.domains)-1),prefix='Data parsing in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
         frames = {}
+        data = []
 
         for idx, topic in enumerate(domains):
             topics[topic] = []
@@ -84,14 +86,17 @@ class DataExplorer():
                         print(err)
                     loader.repair_file(err.position[0], err.position[1])
 
-                for sentance in data:
-                    phrase = Phrase(*sentance.toArray())
-                    topics[topic].append(phrase.toDictionary())
+                if (len(data) > 0):
+                    for sentance in data:
+                        phrase = Phrase(*sentance.toArray())
+                        topics[topic].append(phrase.toDictionary())
+                else:
+                    raise Exception('data length is 0')
 
                 frames[topic] = pd.DataFrame(topics[topic])
                 frames[topic].to_csv('aggregated/'+topic+'.csv')
-                print("Done topic: {}, {} / {}".format(topic, idx, len(domains)))
-
+                # print("Done topic: {}, {} / {}".format(topic, idx, len(domains)))
+                pb.print_progress_bar(idx)
             self.frames = frames
 
     def readData(self):
