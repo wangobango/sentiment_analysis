@@ -112,7 +112,7 @@ class WordPolarityCounting:
     
 if __name__ == "__main__":
     if "--help" in sys.argv:
-        print("Script for training and evaluation baseline model. Script can be used with following comands:\n" + \
+        print("Script for training and evaluating baseline model. Script can be used with following comands:\n" + \
             " teach - trains the model based on preloaded data\n evaluate - evaluates model based on previosuly trained model" + \
             "\nTo get more information of script process add --log to command\nTo train model parallelly use --parallel" + \
             "\nexample usage\n'python3 -m baselines.word_polarity_counting teach --log --parallel'")

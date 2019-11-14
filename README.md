@@ -69,9 +69,9 @@ python3 -m utils.test_set_splitter --append [path_to_file]
   * 1# at this point ```results``` analysis sometimes crashes. This exception is then caught and ```21.37``` value is saved to results temoporarly
 
 # Baseline models
-This model uses linear regression, as well as SGD to calculate loss function. 
-## Mean length of text based model
 
+## Mean length of text based model
+This model uses linear regression, as well as SGD to calculate loss function. 
 ### Prerequisites
   - have generated ```test_set``` and ```data_set```
 
@@ -83,4 +83,28 @@ python3 -m baselines.mean_length_baseline -teach
 To evaluate the model on a test set:
 ```
 python3 -m baselines.mean_length_baseline -evaluate
+```
+
+## Counting text score based on words' polarity
+This model calulates border value based on text score which later is used to decide if text has 'positive' or 'negative' polarity. Border value is just mean of all text scores from ```data_set```
+### Prerequisites
+  - have generated ```test_set``` and ```data_set```
+### Usage
+To teach model and save it to binary file for later use, type :
+```
+python3 -m baselines.word_polarity_counting -teach
+```
+To evaluate the model on a test set:
+```
+python3 -m baselines.word_polarity_counting -evaluate
+```
+Aditional options:
+```
+--log - to get more information about script process
+```
+```
+--parallel - to tech model on multiple processors, by default it uses only one :(
+```
+```
+--help - to get more information
 ```
