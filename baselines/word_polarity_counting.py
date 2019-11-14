@@ -76,7 +76,7 @@ class WordPolarityCounting:
         self.evaluator.evaluate(df_test['polarity'], df_test['predicted'])
 
     """
-    Function which calucates polartity value / score for whole text
+    Function which calucates polarity value / score for whole text
     """
     def get_text_polarity_num_val(self, text):
         tokenizer = RegexpTokenizer(r'\w+')
