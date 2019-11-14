@@ -65,7 +65,6 @@ class Test_set_splitter:
             if (log):
                 print("test_set_part size =", test_set_part.shape[0], "data_set_part size =", data_set_part.shape[0])
                 print("test_set size =", test_set.shape[0], "data_set size =", data_set.shape[0], "\n")
-
         print("Saving to files {}, {}".format(self.test_set_path, self.data_set_path))
         test_set.to_csv(self.test_set_path, index = False)
         data_set.to_csv(self.data_set_path, index = False)
