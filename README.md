@@ -64,6 +64,7 @@ python3 -m utils.test_set_splitter --append [path_to_file]
   * ```-debug``` - to print error logs
   * ```-dump``` - to dump the analysis results to results.json file
   * ```-plot``` - to show plot analysis as well as save plots to ```plot``` directory
+  * ```-aggregate``` - to aggregate data in ```aggregated``` directory
 
 ## Known issues:
   * 1# at this point ```results``` analysis sometimes crashes. This exception is then caught and ```21.37``` value is saved to results temoporarly
