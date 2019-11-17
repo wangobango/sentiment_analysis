@@ -1,4 +1,5 @@
 import json
+import sys
 from .config import Config
 from pprint import pprint
 
@@ -22,4 +23,4 @@ class ResultsProcessor:
 if __name__ == "__main__":
     rp = ResultsProcessor()
     rp.loadResults()
-    rp.getValueFromAllDomains("personCorBetweenTextLengthAndPolarity")
+    rp.getValueFromAllDomains(sys.argv[1])
