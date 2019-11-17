@@ -69,6 +69,7 @@ class DataExplorer():
 
     def parseData(self):
         loader = Loader()
+        loader.set_parser(PolarityParser())
         self.config.addProperty(PROP,VALUE)
         topics = {}
         path = self.config.readValue(PATH)
@@ -84,7 +85,6 @@ class DataExplorer():
                 realPath = path + topic + "/" + item
                 print(realPath)
                 loader.set_path(realPath)
-                loader.set_parser(PolarityParser())
                 # try:
                 data = loader.repair_file().load()
                 # except ET.ParseError as err:
@@ -99,10 +99,10 @@ class DataExplorer():
                 else:
                     raise Exception('data length is 0')
 
-                frames[topic] = pd.DataFrame(topics[topic])
-                frames[topic].to_csv('aggregated/'+topic+'.csv')
+            frames[topic] = pd.DataFrame(topics[topic])
+            frames[topic].to_csv('aggregated/'+topic+'.csv')
+            pb.print_progress_bar(idx)
                 # print("Done topic: {}, {} / {}".format(topic, idx, len(domains)))
-                pb.print_progress_bar(idx)
             self.frames = frames
 
     def readData(self):
