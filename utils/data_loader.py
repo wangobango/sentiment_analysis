@@ -53,15 +53,16 @@ class Loader:
         return text
 
     def repair_file(self):
-        parser = ET.XMLParser(encoding="utf-8")
-
         while True:
             try:
+                parser = ET.XMLParser(encoding="utf-8")
                 ET.parse(self.__path, parser=parser)
             except ET.ParseError as err:
                 print("repairing file at position: " + str(err.position[0]) + ":" + str(err.position[1]))
                 self.delete_wrong_char(err.position[0], err.position[1])
+                print("deleted")
             else:
+                print("Your file is correct")
                 break
 
         return self
@@ -78,6 +79,7 @@ class Loader:
                 fout.write(new_line)
                 continue
             fout.write(line)
+        fout.close()
 
     def load(self):
         if self.__path is None:
@@ -121,23 +123,18 @@ class AspectParser(Parser):
 
 # Example of dealing with reading dataset.
 
+
 # def main():
 #     loader = Loader()
 #     loader.set_path(
-#         '/home/jacek/Downloads/inzynierka/projekt/datasets/Amazon_Instant_Video/Amazon_Instant_Video.pos.4.xml')
+#         '/home/jacek/Downloads/inzynierka/projekt/datasets/Books/Books.pos.4.xml')
 #
 #     loader.set_parser(PolarityParser())
 #     sentences = loader.repair_file().load()
 #
-#     for s in sentences:
-#         print(s.text + "\n")
-    # data_loader.repair_encoding()
-    #
-    # try:
-    #     data_loader.read_xml()
-    # except ET.ParseError as err:
-    #     print(err)
-    #     data_loader.repair_file(err.position[0], err.position[1])
-
+#     # for s in sentences:
+#         # print(s.text + "\n")
+#
+#
 # if __name__ == "__main__":
 #     main()
