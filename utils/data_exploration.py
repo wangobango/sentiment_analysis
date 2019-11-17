@@ -1,4 +1,5 @@
-from .data_loader import DataLoader
+from .data_loader import Loader
+from .data_loader import PolarityParser
 from .config import Config
 from pprint import pprint
 from nltk.tokenize import RegexpTokenizer
@@ -58,40 +59,50 @@ class DataExplorer():
             os.system('mkdir aggregated')
             return True
         else:
-            return False
+            if(len(os.listdir("aggregated/")) != 0):
+                os.system("rm -r aggregated")
+                os.system("mkdir aggregated")
+                return False
 
     def parsePolarityValue(self, value):
         return 1 if value == 'positive' else 0
 
     def parseData(self):
-        loader = DataLoader()
+        loader = Loader()
+        loader.set_parser(PolarityParser())
         self.config.addProperty(PROP,VALUE)
         topics = {}
         path = self.config.readValue(PATH)
         domains = os.listdir(path)
         self.domains = domains
+        pb = ProgressBar(total=int(len(self.domains)-1),prefix='Data parsing in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
         frames = {}
+        data = []
 
         for idx, topic in enumerate(domains):
             topics[topic] = []
             for item in os.listdir(path+topic):
                 realPath = path + topic + "/" + item
+                print(realPath)
                 loader.set_path(realPath)
-                try:
-                    data = loader.read_xml()
-                except ET.ParseError as err:
-                    if '-debug' in sys.argv:
-                        print(err)
-                    loader.repair_file(err.position[0], err.position[1])
+                # try:
+                data = loader.repair_file().load()
+                # except ET.ParseError as err:
+                #     if '-debug' in sys.argv:
+                #         print(err)
+                #     loader.repair_encoding()
 
-                for sentance in data:
-                    phrase = Phrase(*sentance.toArray())
-                    topics[topic].append(phrase.toDictionary())
+                if (len(data) > 0):
+                    for sentance in data:
+                        phrase = Phrase(*sentance.toArray())
+                        topics[topic].append(phrase.toDictionary())
+                else:
+                    raise Exception('data length is 0')
 
-                frames[topic] = pd.DataFrame(topics[topic])
-                frames[topic].to_csv('aggregated/'+topic+'.csv')
-                print("Done topic: {}, {} / {}".format(topic, idx, len(domains)))
-
+            frames[topic] = pd.DataFrame(topics[topic])
+            frames[topic].to_csv('aggregated/'+topic+'.csv')
+            pb.print_progress_bar(idx)
+                # print("Done topic: {}, {} / {}".format(topic, idx, len(domains)))
             self.frames = frames
 
     def readData(self):
@@ -113,7 +124,7 @@ class DataExplorer():
         try:
             results[value] = function(arr, results)
         except TypeError as err:
-            results[value] = 21.37
+            results[value] = 'dupa'
             if '-debug' in sys.argv:
                 print(err)
 
@@ -148,10 +159,18 @@ class DataExplorer():
                         * 4 - summary 
                         * 5 - text
         """
+        ID = 0
+        DOMAIN = 1
+        GIVEN_ID = 2
+        POLARITY = 3
+        SUMMARY = 4
+        TEXT = 5
 
         results = {}
         tokenizer = RegexpTokenizer(r'\w+')
         count = lambda l1, l2: len(list(filter(lambda c: c in l2, l1)))
+
+        print(arr)
 
         # self.setResultsValue(results, 'domain', domain, lambda x, y: x)
         self.setResultsValue(results, 'numberOfPositives', arr, lambda arr, results: (arr[:,3] == 'positive').sum())
@@ -273,10 +292,12 @@ if __name__ == "__main__":
             - Add flag -plot to draw plots
             - Add flag -dump to dump results file to json
             - Add flag -debug to print error logs
+            - Add flag -aggregate to aggregate data in aggregated directory
     """    
     
     de = DataExplorer()
-    if(de.start()):
+    if("-aggregate" in sys.argv):
+        de.start()
         de.parseData()
     else:
         de.readData()
