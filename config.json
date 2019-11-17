@@ -1,11 +1,1 @@
-{
-  "data_path": "./data/",
-  "aggregated_path": "./aggregated/",
-  "test_set_path": "./test_set/test_set.csv",
-  "data_set_path": "./data_set/data_set.csv",
-  "test_set_fraction": 0.3,
-  "CURRENT_DATA": "./data/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml",
-  "results_path": "./results.json",
-  "plot_path": "./plots/",
-  "regression_model" : "regressionModel.pickle"
-}
+{"data_path": "./data/", "aggregated_path": "./aggregated/", "test_set_path": "./test_set/test_set.csv", "data_set_path": "./data_set/data_set.csv", "test_set_fraction": 0.3, "CURRENT_DATA": "./data/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml", "results_path": "./results.json", "plot_path": "./plots/", "regression_model": "regressionModel.pickle"}

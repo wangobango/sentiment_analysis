@@ -58,7 +58,10 @@ class DataExplorer():
             os.system('mkdir aggregated')
             return True
         else:
-            return False
+            if(len(os.listdir("aggregated/")) == 0):
+                os.system("rm -r aggregated")
+                os.system("mkdir aggregated")
+                return False
 
     def parsePolarityValue(self, value):
         return 1 if value == 'positive' else 0
@@ -118,7 +121,7 @@ class DataExplorer():
         try:
             results[value] = function(arr, results)
         except TypeError as err:
-            results[value] = 21.37
+            results[value] = 'dupa'
             if '-debug' in sys.argv:
                 print(err)
 
@@ -157,6 +160,8 @@ class DataExplorer():
         results = {}
         tokenizer = RegexpTokenizer(r'\w+')
         count = lambda l1, l2: len(list(filter(lambda c: c in l2, l1)))
+
+        print(arr)
 
         # self.setResultsValue(results, 'domain', domain, lambda x, y: x)
         self.setResultsValue(results, 'numberOfPositives', arr, lambda arr, results: (arr[:,3] == 'positive').sum())
@@ -278,10 +283,11 @@ if __name__ == "__main__":
             - Add flag -plot to draw plots
             - Add flag -dump to dump results file to json
             - Add flag -debug to print error logs
+            - Add flag -aggregate to aggregate data in aggregated directory
     """    
     
     de = DataExplorer()
-    if(de.start()):
+    if("-aggregate" in sys.argv):
         de.parseData()
     else:
         de.readData()
