@@ -8,5 +8,27 @@
   "results_path": "./results.json",
   "plot_path": "./plots/",
   "word_polarity_counting_model": "./baselines/wpcm",
-  "regression_model": "regressionModel.pickle"
+  "regression_model": "regressionModel.pickle",
+  "domains": [
+    "Books",
+    "Movies_TV",
+    "Beauty",
+    "Clothing_Accessories",
+    "Electronics",
+    "Patio",
+    "Baby",
+    "Office_Products",
+    "Health",
+    "Toys_Games",
+    "Pet_Supplies",
+    "Tools_Home_Improvement",
+    "Sports_Outdoors",
+    "Amazon_Instant_Video",
+    "Shoes",
+    "Music",
+    "Video_Games",
+    "Software",
+    "Home_Kitchen",
+    "Automotive"
+  ]
 }
