@@ -113,41 +113,61 @@ class ResultsProcessor:
                             ha='center', va='bottom')
 
     def createPlot(self):
-        labels = range(1,5,1)
+        labels = range(1,6,1)
         data = []
-        for label in labels:
-            data.append(len(self.parsed_dict[label]))
 
-        x = np.arange(len(labels))
-        width = 0.1
-        fig, ax = plt.subplots()
-        rects = []
-        for idx,item in enumerate(data):
-            rects.append(ax.bar(x - int(width/(idx+1)), item, width, label = str(idx)))
+        for idx, label in enumerate(labels):
+            for item in self.parsed_dict[label]:
+                data.append(idx)
 
-        ax.set_ylabel('Word frequencues')
-        ax.set_title('Word frequencies')
-        ax.set_xticks(x)
-        ax.set_xticklabels(labels)
-        ax.legend()
-
-        for rect in rects:
-            self.autolabel(rect, ax)
-        fig.tight_layout()
+        num_bins = 5
+        n, bins, patches = plt.hist(data, num_bins, facecolor='blue', alpha=0.5)
         plt.show()
 
+        # print(labels)
+        # for label in labels:
+        #     data.append(len(self.parsed_dict[label]))
+
+        # pprint(data)
+
+        # x = np.arange(len(labels))
+        # width = 0.1
+        # fig, ax = plt.subplots()
+        # rects = []
+        # for idx,item in enumerate(data):
+        #     rects.append(ax.bar(x - int(width/(idx+1)), item, width, label = str(idx)))
+
+        # ax.set_ylabel('Word frequencues')
+        # ax.set_title('Word frequencies')
+        # ax.set_xticks(x)
+        # ax.set_xticklabels(labels)
+        # ax.legend()
+
+        # for rect in rects:
+        #     self.autolabel(rect, ax)
+        # fig.tight_layout()
+        # plt.show()
+
 if __name__ == "__main__":
+    """
+        args : 
+            -plot -> results in histogram of word occurances
+            -calculate -> dumps 2 json files : occurances.json and parsed.json. it also serializes dict strucures
+            -res -> does stuff 
+    """
     rp = ResultsProcessor()
     if("-res" in sys.argv):
         rp.loadResults()
         rp.getValueFromAllDomains(sys.argv[2])
-    elif("-freq" in sys.argv):
+    elif("-calculate" in sys.argv):
         rp.calculateWordFreqs()
         rp.calculateWordOccurances()
         rp.serializeDict()
-    elif("-plot" in sys.argv):
+    elif("-freq" in sys.argv):
         rp.loadDict()
-        # print(rp.parsed_dict[1])
-        # rp.createPlot()
         rp.dumpOccurancesToJson()
         rp.dumpParsedDictToJson()
+    elif("-plot" in sys.argv):
+        rp.loadDict()
+        rp.createPlot()
+        # pprint(rp.parsed_dict[4151993])
