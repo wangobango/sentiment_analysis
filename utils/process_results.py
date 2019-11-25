@@ -6,12 +6,23 @@ import pickle
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from .config import Config
+from config import Config
 from pprint import pprint
-from .data_loader import Loader
+from data_loader import Loader
 from nltk.tokenize import RegexpTokenizer
+from scipy import stats
 
 PATH = "data_path"
+TOKENIZER = RegexpTokenizer(r'\w+')
+FUNCTION_DEFINITIONS = {
+    "mean_word_lenght": lambda data_set : sum([len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)])/len(data_set["text"]),
+    "std": lambda data_set : np.std(np.asarray([len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)])),
+    "median": lambda data_set : np.median(np.asarray([len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)])),
+    "variance": lambda data_set: np.var(np.asarray([len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)])),
+    "lenghts": lambda data_set : [len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)],
+    "polarity_positive_lenghts":  lambda data_set : [len(TOKENIZER.tokenize(x)) for x,y in zip(data_set["text"], data_set["polarity"]) if isinstance(x,str) and y == 'positive'],
+    "polarity_negative_lenghts":  lambda data_set : [len(TOKENIZER.tokenize(x)) for x,y in zip(data_set["text"], data_set["polarity"]) if isinstance(x,str) and y == 'negative']
+}
 
 class ResultsProcessor:
 
@@ -41,6 +52,11 @@ class ResultsProcessor:
             frames[topic] = pd.read_csv('aggregated/'+topic+'.csv', delimiter=',')
            
         self.frames = frames
+
+    def readSelectedDomain(self, domain):
+        path = self.config.readValue(PATH)
+        self.domains = os.listdir(path)
+        return pd.read_csv('aggregated/'+domain+'.csv', delimiter=',')
 
     """
         Creates `word : number of times this word occures` dictionary.
@@ -122,6 +138,8 @@ class ResultsProcessor:
 
         num_bins = 5
         n, bins, patches = plt.hist(data, num_bins, facecolor='blue', alpha=0.5)
+        path = self.config.readValue("plot_path")
+        plt.savefig(path+"word_freqs.png")
         plt.show()
 
         # print(labels)
@@ -148,12 +166,103 @@ class ResultsProcessor:
         # fig.tight_layout()
         # plt.show()
 
+    def plotMeanLengthOfTextHistForSelectedDomain(self, domain):
+        tokenizer = RegexpTokenizer(r'\w+')
+        domain_data = self.readSelectedDomain(domain)
+        data = [len(tokenizer.tokenize(x)) for idx, x in enumerate(domain_data["text"]) if isinstance(x,str)]
+        num_bins = 50
+        n, bins, patches = plt.hist(data, num_bins, facecolor='blue', alpha=0.75)
+        plt.xlim(0, 600)
+        plt.grid(True)
+        plt.savefig(self.config.readValue("plot_path")+"plotMeanLengthOfTextHistForSelectedDomain.png")
+        plt.show()
+
+    def plotMeanLengthOfThextHistForDataSet(self):
+        tokenizer = RegexpTokenizer(r'\w+')
+        path = self.config.readValue("data_set_path")
+        domain_data = pd.read_csv(path, delimiter=',')
+        data = [len(tokenizer.tokenize(x)) for idx, x in enumerate(domain_data["text"]) if isinstance(x,str)]
+        num_bins = 50
+        n, bins, patches = plt.hist(data, num_bins, facecolor='blue', alpha=0.75)
+        plt.xlim(0, 600)
+        plt.grid(True)
+        path = self.config.readValue("plot_path")
+        plt.savefig(path+"plotMeanLengthOfThextHistForDataSet")
+        plt.show()
+
+    def normalizedMeanLengthHistForDataSet(self):
+        tokenizer = RegexpTokenizer(r'\w+')
+        path = self.config.readValue("data_set_path")
+        domain_data = pd.read_csv(path, delimiter=',')
+        data = [len(tokenizer.tokenize(x)) for idx, x in enumerate(domain_data["text"]) if isinstance(x,str)]
+        num_bins = 50
+        n, bins, patches = plt.hist(data, num_bins, facecolor='blue', alpha=0.75)
+        plt.xlim(0, 600)
+        plt.grid(True)
+        plt.show()
+
+    def testMeanTextLenghtDifferenceBetweenAllDomains(self):
+        print("\n")
+        print("Testing mean text lengths difference between domains")
+        print("Reading data")
+        self.readData()
+        print("Null hypothesis -> means of two populations are equal to each other")
+        print("Calculating means")
+        means = {}
+        for domain in self.domains:
+            means[domain] = FUNCTION_DEFINITIONS["lenghts"](self.frames[domain])
+        print("Performing tests")
+        accepted = 0
+        rejected = 0
+        tested = []
+        for domain in self.domains:
+            for second_domain in self.domains:
+                if(domain != second_domain and not domain+second_domain in tested and not second_domain+domain in tested):
+                    print("-----------***-----------")
+                    print("Testing between {}, and {}".format(domain, second_domain))
+                    ttest,pval = stats.ttest_ind(means[domain],means[second_domain])
+                    print("ttest", ttest)
+                    print("p-value", pval)
+                    if pval <0.05:
+                        print("we reject null hypothesis")
+                        rejected += 1
+                    else:
+                        print("we accept null hypothesis")
+                        accepted += 1
+                    tested.append(domain+second_domain)
+
+        print("Total accepted: {}, total rejected: {}".format(accepted, rejected))
+
+    def testMeanTextLengthDiffBetweenPolarities(self):
+        print("\n")
+        print("Testing mean length difference between polarities")
+        print("Reading data")
+        path = self.config.readValue("data_set_path")
+        data_set = pd.read_csv(path, delimiter=',')
+        print("Null hypothesis -> means lenghts of text for polarity positive and negative are equal to each other")
+        print("Calculating lengths")
+        X = FUNCTION_DEFINITIONS["polarity_positive_lenghts"](data_set)
+        Y = FUNCTION_DEFINITIONS["polarity_negative_lenghts"](data_set)
+        print("Means for positive: {}, and negative: {}".format(np.mean(np.asarray(X)), np.mean(np.asarray(Y))))
+        print("Performing tests")
+        print("-----------***-----------")
+        print("Testing between {}, and {}".format("positive", "negative"))
+        ttest,pval = stats.ttest_ind(X,Y)
+        print("ttest", ttest)
+        print("p-value", pval)
+        if pval <0.05:
+            print("we reject null hypothesis")
+        else:
+            print("we accept null hypothesis")
+
+
 if __name__ == "__main__":
     """
         args : 
             -plot -> results in histogram of word occurances
-            -calculate -> dumps 2 json files : occurances.json and parsed.json. it also serializes dict strucures
-            -res -> does stuff 
+            -freq -> dumps 2 json files : occurances.json and parsed.json. it also serializes dict strucures
+            -res -> does stuff ... mainly creates stuff ... and other stuff as well ...
+            -calculate -> calculate occurances and freqs and dumps dict to pickle
     """
     rp = ResultsProcessor()
     if("-res" in sys.argv):
@@ -170,4 +279,11 @@ if __name__ == "__main__":
     elif("-plot" in sys.argv):
         rp.loadDict()
         rp.createPlot()
+        rp.plotMeanLengthOfTextHistForSelectedDomain("Books")
+        rp.plotMeanLengthOfThextHistForDataSet()
         # pprint(rp.parsed_dict[4151993])
+
+    # - Test wether there is any statistically relevant difference in mean length (and other variables) of words between domains.
+    elif("-test" in sys.argv):
+        rp.testMeanTextLenghtDifferenceBetweenAllDomains()
+        rp.testMeanTextLengthDiffBetweenPolarities()
