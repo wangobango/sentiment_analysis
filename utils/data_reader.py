@@ -17,11 +17,11 @@ class DataReader:
 
     def read_data_set(self):
         LOGGER.info("Reading data set...")
-        self.data_set = self.read_set(self.data_set_file_path)
+        return self.read_set(self.data_set_file_path)
 
     def read_test_set(self):
         LOGGER.info("Reading test set...")
-        self.test_set = self.read_set(self.test_set_file_path)   
+        return self.read_set(self.test_set_file_path)   
 
     def read_set(self, data_set_file):
         dset = utils.shuffle(pd.read_csv(data_set_file))
