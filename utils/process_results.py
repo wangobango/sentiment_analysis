@@ -11,6 +11,8 @@ from pprint import pprint
 from data_loader import Loader
 from nltk.tokenize import RegexpTokenizer
 from scipy import stats
+from statsmodels.formula.api import ols
+
 
 PATH = "data_path"
 TOKENIZER = RegexpTokenizer(r'\w+')
@@ -235,6 +237,7 @@ class ResultsProcessor:
 
     def testMeanTextLengthDiffBetweenPolarities(self):
         print("\n")
+        print("-----------***-----------")
         print("Testing mean length difference between polarities")
         print("Reading data")
         path = self.config.readValue("data_set_path")
@@ -254,6 +257,27 @@ class ResultsProcessor:
             print("we reject null hypothesis")
         else:
             print("we accept null hypothesis")
+
+    def anovaTestMeanTextLenghtOfDomains(self):
+        print("\n")
+        print("-----------***-----------")
+        print("Anova testing mean length difference of texts between domains")
+        print("Reading data")
+        self.readData()
+        print("Null hypothesis -> means of all populations are equal to each other")
+        print("Alternative hypothesis -> there is a difference in means of the populations")
+        print("Calculating means")
+        means = {}
+        for domain in self.domains:
+            means[domain] = FUNCTION_DEFINITIONS["lenghts"](self.frames[domain])
+        print("Performing tests")
+        f, pval = stats.f_oneway(*means.values())
+        print(f,pval)
+        if pval <0.05:
+            print("we reject null hypothesis")
+        else:
+            print("we accept null hypothesis")
+
 
 
 if __name__ == "__main__":
@@ -287,3 +311,4 @@ if __name__ == "__main__":
     elif("-test" in sys.argv):
         rp.testMeanTextLenghtDifferenceBetweenAllDomains()
         rp.testMeanTextLengthDiffBetweenPolarities()
+        rp.anovaTestMeanTextLenghtOfDomains()
