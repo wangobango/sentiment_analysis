@@ -20,7 +20,7 @@ Component whose job is to split the data into test set and data set. The test se
 
 It is mandatory to first use:
 ```
-python3 -m utils.data_exploration -aggregate
+python3 -m utils.data_exploration
 ```
 
 To aggregate data in ```aggregated``` directory.
