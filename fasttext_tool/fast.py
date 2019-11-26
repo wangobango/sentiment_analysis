@@ -24,7 +24,7 @@ if __name__ == "__main__":
         testSet = dataReader.read_test_set()
         adjustForm(testSet, "data.test")
     if not "model.bin" in os.listdir(FOLDER):
-        model = ft.train_supervised(input=FOLDER + "data.test")
+        model = ft.train_supervised(input=FOLDER + "data.train")
         model.save_model(FOLDER + "model.bin")
     else:
         model = ft.load_model(FOLDER + "model.bin")
@@ -34,4 +34,3 @@ if __name__ == "__main__":
     with open(FOLDER + "results.txt", 'w') as output:
         output.write(metrics_str)
     print(metrics_str)
-    
