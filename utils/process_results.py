@@ -12,6 +12,7 @@ from data_loader import Loader
 from nltk.tokenize import RegexpTokenizer
 from scipy import stats
 from statsmodels.formula.api import ols
+from Levenshtein import jaro_winkler
 
 
 PATH = "data_path"
@@ -95,7 +96,18 @@ class ResultsProcessor:
             else:
                 parsed_dict[value] = [key]
         print("Finished parsing")
+        print("Calculating jaro_winkler distance for words that occure once")
+        for item in self.parsed_dict[1]:
+            pass
         self.parsed_dict = parsed_dict
+
+    def getOccurances(self):
+        new_occurances = {}
+        for key,value in self.parsed_dict.items():
+            new_occurances[key] = len(value)
+
+        sorted_dict = [(i, new_occurances[i]) for i in sorted(new_occurances.keys())]
+        self.newOccurances = sorted_dict
 
     def dumpOccurancesToJson(self):
         new_occurances = {}
@@ -106,6 +118,7 @@ class ResultsProcessor:
 
         with(open("occurances.json", "w")) as f:
             json.dump(sorted_dict, f)
+        self.newOccurances = sorted_dict
 
     def dumpParsedDictToJson(self):
         with(open("parsed.json", "w")) as f:
@@ -116,12 +129,20 @@ class ResultsProcessor:
         with(open("dict.pickl", "wb")) as f:
             pickle.dump(self.parsed_dict, f)
 
+    def serializeAnyDict(self, obj, name):
+        with(open("{}.pickl".format(name), "wb")) as f:
+            pickle.dump(obj, f)
+
+    def loadAnyDict(self, name):
+        with(open("{}.pickl".format(name), "rb")) as f:
+            return pickle.load(f)
+
     def loadDict(self):
         with(open("dict.pickl", "rb")) as f:
             self.parsed_dict = pickle.load(f)
 
+
     def autolabel(self, rects, ax):
-            """Attach a text label above each bar in *rects*, displaying its height."""
             for rect in rects:
                 height = rect.get_height()
                 ax.annotate('{}'.format(height),
@@ -278,6 +299,25 @@ class ResultsProcessor:
         else:
             print("we accept null hypothesis")
 
+    
+    def getStopWordsInDataSet(self):
+        minVal = max(self.parsed_dict.keys(), key=lambda x: int(x))
+        lowestVal = [minVal]
+        for i in range(minVal-1,minVal-15,-1):
+            if i in self.parsed_dict:
+                lowestVal.append(i)
+        pom = []
+        for y in lowestVal:
+            for x in self.parsed_dict[y]:
+                pom.extend(x)
+        self.stopWords = pom
+        return pom
+        # return [*x for x in self.parsed_dict[y] for y in lowestVal]
+
+    def getUniqueWordsInDataSet(self):
+        self.unique = self.parsed_dict[1]
+        return self.parsed_dict[1]
+
 
 
 if __name__ == "__main__":
@@ -299,6 +339,7 @@ if __name__ == "__main__":
     elif("-freq" in sys.argv):
         rp.loadDict()
         rp.dumpOccurancesToJson()
+        rp.serializeAnyDict(rp.newOccurances, "occurances_dict.pickl")
         rp.dumpParsedDictToJson()
     elif("-plot" in sys.argv):
         rp.loadDict()
@@ -312,3 +353,10 @@ if __name__ == "__main__":
         rp.testMeanTextLenghtDifferenceBetweenAllDomains()
         rp.testMeanTextLengthDiffBetweenPolarities()
         rp.anovaTestMeanTextLenghtOfDomains()
+
+    elif("-preprocess" in sys.argv):
+        rp.loadDict()
+        rp.getOccurances()
+        rp.getStopWordsInDataSet()
+        rp.getUniqueWordsInDataSet()
+        print("Dupa")
