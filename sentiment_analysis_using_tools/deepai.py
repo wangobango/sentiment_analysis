@@ -16,6 +16,7 @@ import pandas as pd
 import threading
 from utils.data_evaluator import Evaluator
 import time
+import sys
 # export PYTHONPATH="$PYTHONPATH:$HOME/Ubuntu/sentiment_analysis/" to get data_evaluator until Ramon makes it work
 
 class DeepAi:
@@ -134,17 +135,27 @@ class DeepAi:
         print("===========\nStatistics:\nnumOfTrues: {}\nnumOfAllLines: {}\nnumOfErors: {}\nnumOfNeutrals: {}\n\npercentMatching: {}"
         .format(numOfTrues, lenAllLines, numOfErrors, numOfNeutrals, numOfTrues/lenAllLines))
 
-def main():
+
+    def getBalancedNrows(self, numOfRows):
+        temp = list(range(0, numOfRows//2)) + list(range(self.nrows-numOfRows//2, self.nrows))
+        print("DUPADUPADUPADUPADUAPDAPUPDA {}".format(temp))
+        return temp
+
+
+def main(numberOfValuesToCheck, numOfThreads):
+    pd.set_option('display.max_colwidth', -1)
     deepAi = DeepAi("./test_set/test_set.csv")
     evaluator = Evaluator()
     
-    numbersToCheck = list(range(0,164))
+    # temporary, need to get values randomly
+    # numbersToCheck = list(range(0, numberOfValuesToCheck))
+    numbersToCheck = deepAi.getBalancedNrows(numberOfValuesToCheck)
     
     expectedList = []
     actualList = []
     startTime = time.time()
-    for i in range(2):
-        expectedListTemp, actualListTemp = deepAi.runParallelForLines(numbersToCheck[i*80:i*80 + 80])
+    for i in range(numberOfValuesToCheck // numOfThreads):
+        expectedListTemp, actualListTemp = deepAi.runParallelForLines(numbersToCheck[i*numOfThreads:(i+1)*numOfThreads])
         expectedList = expectedList + expectedListTemp
         actualList = actualList + actualListTemp
     
@@ -154,10 +165,19 @@ def main():
     fn = 0
     fp = 0
     for i in range (len(expectedList)):
+        # with open("dupa.txt", 'w+') as f:
+        #     f.write("error on line {}, line is: {}".format(numbersToCheck[i], deepAi.dataFrame[0:1]))
         if (expectedList[i] == actualList[i] and expectedList[i] == 'positive'): tp = tp + 1
         elif (expectedList[i] == actualList[i] and expectedList[i] == 'negative'): tn = tn + 1
         elif (expectedList[i] == 'positive' and actualList[i] == 'negative'): fn = fn + 1
         elif (expectedList[i] == 'negative' and actualList[i] == 'positive'): fp = fp + 1 
+        elif (expectedList[i] == 'error'):
+            try:
+                with open("dupa.txt", 'a') as f:
+                    f.write("error on line {}, line is:\n{}\n".format(numbersToCheck[i], deepAi.dataFrame[numbersToCheck[i]:numbersToCheck[i]+1]))
+            except:
+                print("HUGE ERROR")
+                continue
 
     expectedListWithoutErrors = [x for x in expectedList if x != 'error']
     actualListWithoutErrors = [x for x in actualList if x != 'error']
@@ -170,7 +190,13 @@ def main():
     return
 
 if __name__ == "__main__":
-    main()
+    if(len(sys.argv) == 1):
+        main(164, 80)
+    elif(len(sys.argv) == 3):
+        print("Running with 2 arguments")
+        main(int(sys.argv[1]), int(sys.argv[2]))
+    else:
+        print("something wrong with passed arguments")
     # deepAi = DeepAi("./test_set/test_set.csv")
 
     # csvSentiment, apiSentiment = deepAi.getSentimentForLine(4)
