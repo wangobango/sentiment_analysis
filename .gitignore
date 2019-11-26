@@ -10,3 +10,8 @@ absa_data/*
 .idea/*
 *.pickle
 dranziera_protocol.zip
+fasttext_tool/fastText*
+fasttext_tool/data.*
+fasttext_tool/readme.txt
+fasttext_tool/model.bin
+*/*.zip
