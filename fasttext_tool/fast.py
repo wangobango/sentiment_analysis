@@ -30,4 +30,8 @@ if __name__ == "__main__":
         model = ft.load_model(FOLDER + "model.bin")
     (_, precision, recall) = model.test(FOLDER + "data.test")
     metrics = {'precision': precision, 'recall': recall, 'fscore': evaluator.calculate_fscore(precision, recall)}
-    evaluator.print(metrics)
+    metrics_str = evaluator.getString(metrics)
+    with open(FOLDER + "results.txt", 'w') as output:
+        output.write(metrics_str)
+    print(metrics_str)
+    

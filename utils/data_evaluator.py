@@ -43,10 +43,13 @@ class Evaluator:
         self.fp = confusionMatrix[0][1]
         return confusionMatrix
 
-    def print(self, evaluatedMetrics):
+    def getString(self, evaluatedMetrics): 
         text = ""
         for i, item in enumerate(evaluatedMetrics.items()):
             if i > 0:
                 text += "\t" if i % 2 == 0 else "\n"
             text += str(item[0]) + ": " + str(item[1])
-        print(text)
+        return text
+
+    def print(self, evaluatedMetrics):
+        print(self.getString(evaluatedMetrics))
