@@ -109,3 +109,25 @@ Aditional options:
 ```
 --help - to get more information
 ```
+
+# Existing Tools
+
+## FastText
+
+https://fasttext.cc/
+
+### Prerequisites
+  - have generated ```test_set``` and ```data_set```
+
+### Usage
+If you have not installed FastText just run scrip 
+```
+fasttext_tool/setup.sh
+```
+It will download FastText and install it (one comand requiers sudo privileges).
+
+To test and run FastText just type command 
+```
+python3 -m fasttext_tool.fast
+``` 
+Script with generated ```data.train``` and ```data.test``` needed for futher learing and evaluating. If such files exists in ```fasttext_tool/``` then script will skip generaing step. After that script will train model based on ```data.train``` and save trained model to ```model.bin```. If such file already exists in ```fasttext_tool/``` then script will skip this step. Last step is evaulating model based on ```data.train```. Results of evaluation will be saved to file ```fasttext_tool/results.txt``` and printed on console.
