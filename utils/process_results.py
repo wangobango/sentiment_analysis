@@ -11,6 +11,7 @@ from pprint import pprint
 from data_loader import Loader
 from nltk.tokenize import RegexpTokenizer
 from scipy import stats
+import collections
 
 PATH = "data_path"
 TOKENIZER = RegexpTokenizer(r'\w+')
@@ -129,51 +130,34 @@ class ResultsProcessor:
                             ha='center', va='bottom')
 
     def createPlot(self):
-        labels = range(1,6,1)
+        r = 15
+        labels = range(1,r,1)
         data = []
 
         for idx, label in enumerate(labels):
             for item in self.parsed_dict[label]:
-                data.append(idx)
-
-        num_bins = 5
-        n, bins, patches = plt.hist(data, num_bins, facecolor='blue', alpha=0.5)
+                data.append(idx+1)
+        counter=collections.Counter(data)
+        n, bins, patches = plt.hist(data, align='left', rwidth=0.5, bins = range(1, r+1), facecolor='blue')
+        plt.grid(True)
+        plt.xlim(0, 15)
+        plt.ylim(0, 250000)
+        plt.xlabel('word occuracy')
+        plt.ylabel('words count')
         path = self.config.readValue("plot_path")
         plt.savefig(path+"word_freqs.png")
         plt.show()
-
-        # print(labels)
-        # for label in labels:
-        #     data.append(len(self.parsed_dict[label]))
-
-        # pprint(data)
-
-        # x = np.arange(len(labels))
-        # width = 0.1
-        # fig, ax = plt.subplots()
-        # rects = []
-        # for idx,item in enumerate(data):
-        #     rects.append(ax.bar(x - int(width/(idx+1)), item, width, label = str(idx)))
-
-        # ax.set_ylabel('Word frequencues')
-        # ax.set_title('Word frequencies')
-        # ax.set_xticks(x)
-        # ax.set_xticklabels(labels)
-        # ax.legend()
-
-        # for rect in rects:
-        #     self.autolabel(rect, ax)
-        # fig.tight_layout()
-        # plt.show()
 
     def plotMeanLengthOfTextHistForSelectedDomain(self, domain):
         tokenizer = RegexpTokenizer(r'\w+')
         domain_data = self.readSelectedDomain(domain)
         data = [len(tokenizer.tokenize(x)) for idx, x in enumerate(domain_data["text"]) if isinstance(x,str)]
-        num_bins = 50
-        n, bins, patches = plt.hist(data, num_bins, facecolor='blue', alpha=0.75)
+        n, bins, patches = plt.hist(data, bins = 50,rwidth=0.95 , facecolor='blue')
         plt.xlim(0, 600)
         plt.grid(True)
+        plt.title("text length for domain: " + domain)
+        plt.xlabel('text count')
+        plt.ylabel('length')
         plt.savefig(self.config.readValue("plot_path")+"plotMeanLengthOfTextHistForSelectedDomain.png")
         plt.show()
 
@@ -182,10 +166,12 @@ class ResultsProcessor:
         path = self.config.readValue("data_set_path")
         domain_data = pd.read_csv(path, delimiter=',')
         data = [len(tokenizer.tokenize(x)) for idx, x in enumerate(domain_data["text"]) if isinstance(x,str)]
-        num_bins = 50
-        n, bins, patches = plt.hist(data, num_bins, facecolor='blue', alpha=0.75)
+        n, bins, patches = plt.hist(data, bins = 50,rwidth=0.95, facecolor='blue')
         plt.xlim(0, 600)
         plt.grid(True)
+        plt.title("text length for dataset")
+        plt.xlabel('text count')
+        plt.ylabel('length')
         path = self.config.readValue("plot_path")
         plt.savefig(path+"plotMeanLengthOfThextHistForDataSet")
         plt.show()
