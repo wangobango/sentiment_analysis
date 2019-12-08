@@ -33,12 +33,7 @@ class Preprocessor:
                 realPath = path + topic + "/" + item
                 print(realPath)
                 loader.set_path(realPath)
-                # try:
                 data = loader.repair_file().load()
-                # except ET.ParseError as err:
-                #     if '-debug' in sys.argv:
-                #         print(err)
-                #     loader.repair_encoding()
 
                 if (len(data) > 0):
                     for sentance in data:
@@ -50,10 +45,7 @@ class Preprocessor:
             frames[topic] = pd.DataFrame(topics[topic])
             frames[topic].to_csv('aggregated/'+topic+'.csv')
             pb.print_progress_bar(idx)
-            # print("Done topic: {}, {} / {}".format(topic, idx, len(domains)))
 
 
 if __name__ == "__main__":
-    # prep = Preprocessor()
-    # prep.aggregateData()
     Preprocessor.aggregateData()
