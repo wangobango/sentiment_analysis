@@ -103,8 +103,10 @@ class ResultsProcessor:
                 parsed_dict[value] = [key]
         print("Finished parsing")
         print("Calculating jaro_winkler distance for words that occure once")
-        for item in self.parsed_dict[1]:
-            pass
+        # for item in self.parsed_dict[1]:
+        #     pass
+        
+        self.serializeAnyDict(parsed_dict, "parsed_dict")
         self.parsed_dict = parsed_dict
 
     def getOccurances(self):
@@ -292,6 +294,7 @@ class ResultsProcessor:
 
     
     def getStopWordsInDataSet(self):
+        self.parsed_dict = self.loadAnyDict("parsed_dict")
         minVal = max(self.parsed_dict.keys(), key=lambda x: int(x))
         lowestVal = [minVal]
         for i in range(minVal-1,minVal-15,-1):
