@@ -6,9 +6,9 @@ import pickle
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from config import Config
+from .config import Config
 from pprint import pprint
-from data_loader import Loader
+from .data_loader import Loader
 from nltk.tokenize import RegexpTokenizer
 from scipy import stats
 from statsmodels.formula.api import ols
@@ -39,6 +39,12 @@ class ResultsProcessor:
         path = self.config.readValue("results_path")
         with (open(path, "r")) as f:
             self.results = json.load(f)
+
+    def stemInput(self):
+        pass
+
+    def lematizeInput(self):
+        pass
     
     def getValueFromAllDomains(self, value):
         results = {}
@@ -339,10 +345,10 @@ if __name__ == "__main__":
     elif("-freq" in sys.argv):
         rp.loadDict()
         rp.dumpOccurancesToJson()
-        rp.serializeAnyDict(rp.newOccurances, "occurances_dict.pickl")
+        rp.serializeAnyDict(rp.newOccurances, "occurances_dict")
         rp.dumpParsedDictToJson()
     elif("-plot" in sys.argv):
-        rp.loadDict()
+        rp.loadDict() 
         rp.createPlot()
         rp.plotMeanLengthOfTextHistForSelectedDomain("Books")
         rp.plotMeanLengthOfThextHistForDataSet()
@@ -356,7 +362,7 @@ if __name__ == "__main__":
 
     elif("-preprocess" in sys.argv):
         rp.loadDict()
-        rp.getOccurances()
+        rp.occurances = rp.loadAnyDict("occurances_dict")
+        # rp.getOccurances()
         rp.getStopWordsInDataSet()
         rp.getUniqueWordsInDataSet()
-        print("Dupa")

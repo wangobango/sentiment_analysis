@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 import html
-from config import Config
+from .config import Config
 import lxml
 
 
