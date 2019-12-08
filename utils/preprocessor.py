@@ -125,13 +125,27 @@ class Preprocessor:
         pass
 
 if __name__ == "__main__":
+    """
+        @params:
+            text -> text to be processed, given as a single string
+        @returns:
+            text processed after applying selected build steps
+        Usage:
+            prep = Preprocessor()
+            prep.setText(text).correctSpelling().{...}.build()
+
+        Static:
+            It's possible to only use static method to aggregate data like:
+                from utils.preprocessor import Preprocessor
+                Preprocessor.aggregateData()
+    """
     prep = Preprocessor()
-    # prep.aggregateData()
     data = pd.read_csv('./data_set/data_set.csv', nrows=10)
     example = data['text'][1]
-    # prep.setText(example)
-    # prep.removeStopWordsEnglishCorpusBased()
     print(example)
     print("---------***----------")
     text = prep.setText(example).removeStopWordsDatasetBased().build()
     print(text)
+
+    # TODO usunięcie znakow nowej lini
+    # BUG usuwanie znaków interpunkcyjnych za każdym jebanym RAZEM 
