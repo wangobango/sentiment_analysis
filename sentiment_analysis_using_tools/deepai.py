@@ -17,6 +17,8 @@ import threading
 from utils.data_evaluator import Evaluator
 import time
 import sys
+import signal
+
 # export PYTHONPATH="$PYTHONPATH:$HOME/Ubuntu/sentiment_analysis/" to get data_evaluator until Ramon makes it work
 
 class DeepAi:
@@ -33,7 +35,7 @@ class DeepAi:
             data={
                 'text': text_string,
             },
-            headers={'api-key': '32f60ff7-bd13-4c98-8bdc-b5e71b93e067'}
+            headers={'api-key': '05a8b209-4017-4dfa-b937-62be09236442'}
         )
         json = r.json()
         try:
@@ -141,6 +143,81 @@ class DeepAi:
         print("DUPADUPADUPADUPADUAPDAPUPDA {}".format(temp))
         return temp
 
+def signal_handler(sig, frame):
+    print('You pressed Ctrl+C!')
+    sys.exit(0)
+
+def registerSigintHandler():
+    signal.signal(signal.SIGINT, signal_handler)
+    print('Press Ctrl+C')
+    signal.pause()
+
+def parseValuesGotten(expectedList, actualList, startTime, stopTime):
+    tp = 0
+    tn = 0
+    fn = 0
+    fp = 0
+    for i in range (len(expectedList)):
+        # with open("dupa.txt", 'w+') as f:
+        #     f.write("error on line {}, line is: {}".format(numbersToCheck[i], deepAi.dataFrame[0:1]))
+        if (expectedList[i] == actualList[i] and expectedList[i] == 'positive'): tp = tp + 1
+        elif (expectedList[i] == actualList[i] and expectedList[i] == 'negative'): tn = tn + 1
+        elif (expectedList[i] == 'positive' and actualList[i] == 'negative'): fn = fn + 1
+        elif (expectedList[i] == 'negative' and actualList[i] == 'positive'): fp = fp + 1 
+        elif (expectedList[i] == 'error'):
+            try:
+                with open("dupa.txt", 'a') as f:
+                    # , deepAi.dataFrame[numbersToCheck[i]:numbersToCheck[i]+1]
+                    f.write("{}\n".format(rowsToCheck[i]))
+            except:
+                print("HUGE ERROR")
+                continue
+
+    expectedListWithoutErrors = [x for x in expectedList if x != 'error']
+    actualListWithoutErrors = [x for x in actualList if x != 'error']
+
+    numOfErrors = len(expectedList) - len(expectedListWithoutErrors)
+    timeItTook = stopTime - startTime
+
+    try:
+        evaluator = Evaluator()
+        evaluator.evaluate(expectedListWithoutErrors, actualListWithoutErrors, printConfusionMatrix=True)
+    except:
+        print("something wrong with evaluator")
+    print("tp = {}, tn = {}, fp = {}, fn = {}, num of errors = {}, it took {}s".format(tp, tn, fp, fn, numOfErrors, timeItTook))
+    return
+
+def main2(numOfThreads):
+    pd.set_option('display.max_colwidth', -1)
+    deepAi = DeepAi("./test_set/test_set.csv")
+
+    rowsToCheck = []
+    with open("./sentiment_analysis_using_tools/numbersToCheck.txt") as file:
+        for line in file:
+            rowsToCheck = rowsToCheck + [int(line)]
+
+    print(rowsToCheck)
+
+
+    # rowsToCheck = [0,1,2,3,4,5,6,99,10,22,99999, 23, 24, 25, 50, 10]
+    expectedList = []
+    actualList = []
+    startTime = time.time()
+    for i in range(len(rowsToCheck) // numOfThreads):
+        expectedListTemp, actualListTemp = deepAi.runParallelForLines(rowsToCheck[i*numOfThreads:(i+1)*numOfThreads])
+        expectedList = expectedList + expectedListTemp
+        actualList = actualList + actualListTemp
+    
+    print(len(rowsToCheck) % numOfThreads)
+    print(rowsToCheck[-(len(rowsToCheck) % numOfThreads) : ])
+    expectedListTemp, actualListTemp = deepAi.runParallelForLines(rowsToCheck[-(len(rowsToCheck) % numOfThreads) : ])
+    expectedList = expectedList + expectedListTemp
+    actualList = actualList + actualListTemp
+
+
+    stopTime = time.time()
+    parseValuesGotten()
+
 
 def main(numberOfValuesToCheck, numOfThreads):
     pd.set_option('display.max_colwidth', -1)
@@ -190,6 +267,10 @@ def main(numberOfValuesToCheck, numOfThreads):
     return
 
 if __name__ == "__main__":
+    if(sys.argv[1] == "specificRows"):
+        main2(20)
+        sys.exit()
+
     if(len(sys.argv) == 1):
         main(164, 80)
     elif(len(sys.argv) == 3):
