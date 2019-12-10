@@ -200,7 +200,6 @@ class Preprocessor:
         return self
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     """
         @prerequisites:
             directory 'processed' created in root directory of the project
@@ -231,6 +230,3 @@ if __name__ == "__main__":
     prep.preprocessDataSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     
-=======
-    Preprocessor.aggregateData()
->>>>>>> 3a450b4e5f64b0f336f53f2042ef8892dabcbfa7
