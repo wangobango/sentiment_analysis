@@ -10,20 +10,18 @@ from nltk.stem import WordNetLemmatizer
 from autocorrect import Speller
 from .config import Config
 from console_progressbar import ProgressBar
-from dask.distributed import Client, progress
 import os
 import pandas as pd
 import re
 import nltk
-import dask.multiprocessing
-import dask
-import dask.bag as db
+import multiprocessing as mp
+
 
 PATH = "data_path"
 
 
 class Preprocessor:
-    def __init__(self):
+    def __init__(self, numberOfProcesses = 8):
         self.explorer = DataExplorer()
         self.resultsProcessor = ResultsProcessor()
         self.englishStopWords = set(stopwords.words('english')) 
@@ -38,8 +36,10 @@ class Preprocessor:
         self.speller = Speller()
         self.lemmatizer = WordNetLemmatizer()
         self.stemmer = nltk.stem.SnowballStemmer('english')
+        self.numberOfProcesses = numberOfProcesses
 
-    def processSingleDataSetValue(self, value):
+
+    def processSingleDataSetValue(self, value, output):
         word_tokens = word_tokenize(value)
         if(self.flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
@@ -51,18 +51,32 @@ class Preprocessor:
         if(self.flags['stem'] == True):
             word_tokens = [self.stemmer.stem(word) for word in word_tokens]
         
-        return " ".join(word_tokens)
+        output.put(" ".join(word_tokens))
+
+    def processChunk(self, list, output):
+        for value in list:
+            self.processSingleDataSetValue(value, output)
 
 
     def buildWithFlags(self):
-        client = Client()
-        print("Creating Dask bag.")
-        bag = db.from_sequence(self.data_set[1:1000])
-        print("Applying function to data set")
-        proc = bag.map(lambda x: self.processSingleDataSetValue(x))
-        client.compute(proc, num_workers=8, scheduler='processes')
-        print("Computing finished")
-        return proc
+        self.data_set = self.data_set[:24]
+        output = mp.Queue()
+        offset = int(len(self.data_set)/self.numberOfProcesses)
+        print("Distributeing work to processes")
+        processes = [mp.Process(target=self.processChunk, args=(self.data_set[x*offset:(x+1)*offset], output)) for x in range(self.numberOfProcesses)]        
+
+        for p in processes:
+            p.start()
+
+        for p in processes:
+            p.join()
+
+        print("Calculation finished")
+        results = pd.DataFrame([output.get() for p in processes])
+        if(self.set):
+            results.to_csv(self.config.readValue('processed_data_set'))
+        else:
+            results.to_csv(self.config.readValue('processed_test_set'))
 
     def setCorrectSPelling(self):
         self.flags['spelling'] = True
@@ -181,10 +195,14 @@ class Preprocessor:
         return self
 
     def preprocessTestSet(self):
-        pass
+        self.data_set = pd.read_csv(self.config.readValue('test_set_path'))['text']
+        self.set = True
+        return self
 
 if __name__ == "__main__":
     """
+        @prerequisites:
+            directory 'processed' created in root directory of the project
         @params:
             text -> text to be processed, given as a single string
         @returns:
@@ -199,6 +217,7 @@ if __name__ == "__main__":
                 Preprocessor.aggregateData()
     """
     prep = Preprocessor()
+    # Example:
     # data = pd.read_csv('./data_set/data_set.csv', nrows=10)
     # example = data['text'][1]
     # print(example)
@@ -208,6 +227,6 @@ if __name__ == "__main__":
 
     # TODO usunięcie znakow nowej lini
     # BUG usuwanie znaków interpunkcyjnych za każdym jebanym RAZEM 
-    dupa = prep.preprocessDataSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
-    print(dupa)
-    print(type(dupa))
+    prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
+    prep.preprocessDataSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
+    
