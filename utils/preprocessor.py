@@ -117,12 +117,7 @@ class Preprocessor:
                 realPath = path + topic + "/" + item
                 print(realPath)
                 loader.set_path(realPath)
-                # try:
                 data = loader.repair_file().load()
-                # except ET.ParseError as err:
-                #     if '-debug' in sys.argv:
-                #         print(err)
-                #     loader.repair_encoding()
 
                 if (len(data) > 0):
                     for sentance in data:
@@ -205,6 +200,7 @@ class Preprocessor:
         return self
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     """
         @prerequisites:
             directory 'processed' created in root directory of the project
@@ -235,3 +231,6 @@ if __name__ == "__main__":
     prep.preprocessDataSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     
+=======
+    Preprocessor.aggregateData()
+>>>>>>> 3a450b4e5f64b0f336f53f2042ef8892dabcbfa7

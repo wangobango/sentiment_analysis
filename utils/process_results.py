@@ -18,7 +18,7 @@ from Levenshtein import jaro_winkler
 PATH = "data_path"
 TOKENIZER = RegexpTokenizer(r'\w+')
 FUNCTION_DEFINITIONS = {
-    "mean_word_lenght": lambda data_set : sum([len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)])/len(data_set["text"]),
+    "mean_word_length": lambda data_set : sum([len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)])/len(data_set["text"]),
     "std": lambda data_set : np.std(np.asarray([len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)])),
     "median": lambda data_set : np.median(np.asarray([len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)])),
     "variance": lambda data_set: np.var(np.asarray([len(TOKENIZER.tokenize(x)) for x in data_set["text"] if isinstance(x,str)])),
