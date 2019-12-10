@@ -39,7 +39,7 @@ class Preprocessor:
         self.numberOfProcesses = numberOfProcesses
 
 
-    def processSingleDataSetValue(self, value, output):
+    def processSingleDataSetValue(self, value, polarity, output):
         word_tokens = word_tokenize(value)
         if(self.flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
@@ -51,19 +51,19 @@ class Preprocessor:
         if(self.flags['stem'] == True):
             word_tokens = [self.stemmer.stem(word) for word in word_tokens]
         
-        output.put(" ".join(word_tokens))
+        output.put([" ".join(word_tokens), polarity])
 
     def processChunk(self, list, output):
         for value in list:
-            self.processSingleDataSetValue(value, output)
+            self.processSingleDataSetValue(value[0], value[1], output)
 
 
     def buildWithFlags(self):
-        self.data_set = self.data_set[:24]
+        # self.data_set = self.data_set[:24]
         output = mp.Queue()
         offset = int(len(self.data_set)/self.numberOfProcesses)
         print("Distributeing work to processes")
-        processes = [mp.Process(target=self.processChunk, args=(self.data_set[x*offset:(x+1)*offset], output)) for x in range(self.numberOfProcesses)]        
+        processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output)) for x in range(self.numberOfProcesses)]        
 
         for p in processes:
             p.start()
@@ -191,12 +191,17 @@ class Preprocessor:
 
     # TODO , use list as an input and use jobs library to concat it !!!! + make build steps as flags instead of actuall processing
     def preprocessDataSet(self):
-        self.data_set = pd.read_csv(self.config.readValue('data_set_path'))['text']
+        data_set = pd.read_csv(self.config.readValue('data_set_path'))
+        self.data_set = data_set['text']
+        self.polarities = data_set['polarity']
+        self.set = True
         return self
 
     def preprocessTestSet(self):
-        self.data_set = pd.read_csv(self.config.readValue('test_set_path'))['text']
-        self.set = True
+        data_set = pd.read_csv(self.config.readValue('test_set_path'))
+        self.data_set = data_set['text']
+        self.polarities = data_set['polarity']
+        self.set = False
         return self
 
 if __name__ == "__main__":
@@ -227,6 +232,6 @@ if __name__ == "__main__":
 
     # TODO usunięcie znakow nowej lini
     # BUG usuwanie znaków interpunkcyjnych za każdym jebanym RAZEM 
-    prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     prep.preprocessDataSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
+    prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     
