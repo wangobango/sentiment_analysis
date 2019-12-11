@@ -103,8 +103,6 @@ class ResultsProcessor:
                 parsed_dict[value] = [key]
         print("Finished parsing")
         print("Calculating jaro_winkler distance for words that occure once")
-        # for item in self.parsed_dict[1]:
-        #     pass
         
         self.serializeAnyDict(parsed_dict, "parsed_dict")
         self.parsed_dict = parsed_dict
