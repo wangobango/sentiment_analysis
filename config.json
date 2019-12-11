@@ -30,5 +30,7 @@
     "Software",
     "Home_Kitchen",
     "Automotive"
-  ]
+  ],
+  "processed_data_set":"./processed/data_set.csv",
+  "processed_test_set":"./processed/test_set.csv"
 }
