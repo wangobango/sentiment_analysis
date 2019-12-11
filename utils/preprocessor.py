@@ -15,13 +15,14 @@ import pandas as pd
 import re
 import nltk
 import multiprocessing as mp
-
+import logging
+import sys
 
 PATH = "data_path"
-
+LOGGER = logging.getLogger('preprocessor')
 
 class Preprocessor:
-    def __init__(self, numberOfProcesses = 8):
+    def __init__(self, numberOfProcesses = mp.cpu_count()):
         self.explorer = DataExplorer()
         self.resultsProcessor = ResultsProcessor()
         self.englishStopWords = set(stopwords.words('english')) 
@@ -59,10 +60,10 @@ class Preprocessor:
 
 
     def buildWithFlags(self):
-        # self.data_set = self.data_set[:24]
         output = mp.Queue()
         offset = int(len(self.data_set)/self.numberOfProcesses)
-        print("Distributeing work to processes")
+
+        LOGGER.debug("Distributeing work to processes")
         processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output)) for x in range(self.numberOfProcesses)]        
 
         for p in processes:
@@ -71,7 +72,7 @@ class Preprocessor:
         for p in processes:
             p.join()
 
-        print("Calculation finished")
+        LOGGER.debug("Calculation finished")
         results = pd.DataFrame([output.get() for p in processes])
         if(self.set):
             results.to_csv(self.config.readValue('processed_data_set'))
@@ -130,13 +131,11 @@ class Preprocessor:
             frames[topic].to_csv('aggregated/'+topic+'.csv')
             pb.print_progress_bar(idx)
         return frames
-            # print("Done topic: {}, {} / {}".format(topic, idx, len(domains)))
 
     def setText(self, text):
         self.text = text
         return self
 
-    # TODO zwraca GÓWNO jak narazie :)
     def removeStopWordsDatasetBased(self):
         stopWords = self.resultsProcessor.getStopWordsInDataSet()
         word_tokens = word_tokenize(self.text)
@@ -177,14 +176,11 @@ class Preprocessor:
         return self.text
 
     """
-        Removes \" and ,
+        Removes \" and , TODO
     """
     def removePunctuationMarks(self):
         return self
 
-
-
-    # TODO , use list as an input and use jobs library to concat it !!!! + make build steps as flags instead of actuall processing
     def preprocessDataSet(self):
         data_set = pd.read_csv(self.config.readValue('data_set_path'))
         self.data_set = data_set['text']
@@ -200,6 +196,8 @@ class Preprocessor:
         return self
 
 if __name__ == "__main__":
+    if "--log" in sys.argv:
+        logging.basicConfig(level=logging.INFO)
     """
         @prerequisites:
             directory 'processed' created in root directory of the project
@@ -225,8 +223,6 @@ if __name__ == "__main__":
     # text = prep.setText(example).removeStopWordsDatasetBased().build()
     # print(text)
 
-    # TODO usunięcie znakow nowej lini
-    # BUG usuwanie znaków interpunkcyjnych za każdym jebanym RAZEM 
     prep.preprocessDataSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     
