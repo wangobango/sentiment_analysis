@@ -126,6 +126,7 @@ class DataExplorer():
         except TypeError as err:
             results[value] = 'dupa'
             if '-debug' in sys.argv:
+                print(function)
                 print(err)
 
     def countCapitalLetters(self, string):
@@ -159,18 +160,17 @@ class DataExplorer():
                         * 4 - summary 
                         * 5 - text
         """
-        ID = 0
         DOMAIN = 1
-        GIVEN_ID = 2
-        POLARITY = 3
-        SUMMARY = 4
-        TEXT = 5
+        GIVEN_ID = 0
+        POLARITY = 2
+        SUMMARY = 3
+        TEXT = 4
 
         results = {}
         tokenizer = RegexpTokenizer(r'\w+')
         count = lambda l1, l2: len(list(filter(lambda c: c in l2, l1)))
 
-        print(arr)
+        # print(arr)
 
         # self.setResultsValue(results, 'domain', domain, lambda x, y: x)
         self.setResultsValue(results, 'numberOfPositives', arr, lambda arr, results: (arr[:,3] == 'positive').sum())

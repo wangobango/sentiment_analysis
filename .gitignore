@@ -15,3 +15,4 @@ fasttext_tool/data.*
 fasttext_tool/readme.txt
 fasttext_tool/model.bin
 */*.zip
+*.zip
