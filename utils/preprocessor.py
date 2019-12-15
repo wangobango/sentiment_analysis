@@ -18,6 +18,7 @@ import nltk
 import multiprocessing as mp
 import logging
 import sys
+import copy
 
 PATH = "data_path"
 LOGGER = logging.getLogger('preprocessor')
@@ -43,7 +44,7 @@ class Preprocessor:
         self.mapper = Word2VecMapper()
 
 
-    def processSingleDataSetValue(self, value, polarity, output):
+    def processSingleDataSetValue(self, value, polarity, output, objs, flags):
         word_tokens = word_tokenize(value)
         if(self.flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
@@ -62,9 +63,17 @@ class Preprocessor:
             output.put([" ".join(word_tokens), polarity])
 
     def processChunk(self, list, output):
-        for value in list:
-            self.processSingleDataSetValue(value[0], value[1], output)
-        print("KURWSKOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo")
+        objs = {
+            'speller' : Speller(),
+            'lemmatizer' : Lemmatizer(),
+            'stemmer' : nltk.stem.SnowballStemmer('english'),
+            'mapper' L Word2VecMapper()
+        }
+        flags = self.flags
+        for idx,value in enumerate(list):
+            if(idx % 1000 == 0):
+                LOGGER.debug('Done {}/{}'.format(idx, len(list)))
+            self.processSingleDataSetValue(value[0], value[1], output, objs, flags)
 
     def buildWithFlags(self):
         output = mp.Queue()
