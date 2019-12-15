@@ -17,7 +17,7 @@ class Word2VecMapper:
     def set_target(self, path):
         self.target_train_set = open(path, "a")
 
-    def read(self, lines = 0, path):
+    def read(self, path, lines = 0):
 
         f = open(path, "r")
         try:

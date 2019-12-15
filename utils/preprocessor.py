@@ -10,6 +10,7 @@ from nltk.stem import WordNetLemmatizer
 from autocorrect import Speller
 from .config import Config
 from console_progressbar import ProgressBar
+from .word2vec_mapper import Word2VecMapper
 import os
 import pandas as pd
 import re
@@ -20,6 +21,7 @@ import sys
 
 PATH = "data_path"
 LOGGER = logging.getLogger('preprocessor')
+EMBEDDING = False
 
 class Preprocessor:
     def __init__(self, numberOfProcesses = mp.cpu_count()):
@@ -38,6 +40,7 @@ class Preprocessor:
         self.lemmatizer = WordNetLemmatizer()
         self.stemmer = nltk.stem.SnowballStemmer('english')
         self.numberOfProcesses = numberOfProcesses
+        self.mapper = Word2VecMapper()
 
 
     def processSingleDataSetValue(self, value, polarity, output):
@@ -51,13 +54,17 @@ class Preprocessor:
             word_tokens = [self.lemmatizer.lemmatize(word) for word in word_tokens]
         if(self.flags['stem'] == True):
             word_tokens = [self.stemmer.stem(word) for word in word_tokens]
-        
-        output.put([" ".join(word_tokens), polarity])
+
+        if(EMBEDDING):
+            for word in word_tokens:
+                output.put([self.mapper.word2vec(word), polarity])
+        else:
+            output.put([" ".join(word_tokens), polarity])
 
     def processChunk(self, list, output):
         for value in list:
             self.processSingleDataSetValue(value[0], value[1], output)
-
+        print("KURWSKOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo")
 
     def buildWithFlags(self):
         output = mp.Queue()
@@ -66,10 +73,14 @@ class Preprocessor:
         LOGGER.debug("Distributeing work to processes")
         processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output)) for x in range(self.numberOfProcesses)]        
 
-        for p in processes:
+        for idx,p in enumerate(processes):
+            LOGGER.debug("Staring process {}/{}".format(idx+1, self.numberOfProcesses))
             p.start()
 
-        for p in processes:
+        LOGGER.debug("Joining threads")
+
+        for idx,p in enumerate(processes):
+            LOGGER.debug("Joining process {}/{}".format(idx+1, self.numberOfProcesses))
             p.join()
 
         LOGGER.debug("Calculation finished")
@@ -197,7 +208,9 @@ class Preprocessor:
 
 if __name__ == "__main__":
     if "--log" in sys.argv:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
+    if "-embedding" in sys.argv:
+        EMBEDDING = True
     """
         @prerequisites:
             directory 'processed' created in root directory of the project
@@ -224,5 +237,5 @@ if __name__ == "__main__":
     # print(text)
 
     prep.preprocessDataSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
-    prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
+    # prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     
