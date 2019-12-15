@@ -62,17 +62,17 @@ class Preprocessor:
         else:
             output.put([" ".join(word_tokens), polarity])
 
-    def processChunk(self, list, output):
-        objs = {
-            'speller' : Speller(),
-            'lemmatizer' : Lemmatizer(),
-            'stemmer' : nltk.stem.SnowballStemmer('english'),
-            'mapper' L Word2VecMapper()
-        }
-        flags = self.flags
+    def processChunk(self, list, output, procId):
+        # objs = {
+        #     'speller' : Speller(),
+        #     'lemmatizer' : Lemmatizer(),
+        #     'stemmer' : nltk.stem.SnowballStemmer('english'),
+        #     'mapper' : Word2VecMapper()
+        # }
+        # flags = copy.copy(self.flags)
         for idx,value in enumerate(list):
-            if(idx % 1000 == 0):
-                LOGGER.debug('Done {}/{}'.format(idx, len(list)))
+            if(idx % 100 == 0):
+                LOGGER.debug('{}, done {}/{}'.format(procId, idx, len(list)))
             self.processSingleDataSetValue(value[0], value[1], output, objs, flags)
 
     def buildWithFlags(self):
@@ -80,7 +80,7 @@ class Preprocessor:
         offset = int(len(self.data_set)/self.numberOfProcesses)
 
         LOGGER.debug("Distributeing work to processes")
-        processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output)) for x in range(self.numberOfProcesses)]        
+        processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output, x)) for x in range(self.numberOfProcesses)]        
 
         for idx,p in enumerate(processes):
             LOGGER.debug("Staring process {}/{}".format(idx+1, self.numberOfProcesses))
