@@ -18,6 +18,7 @@ import nltk
 import multiprocessing as mp
 import logging
 import sys
+import copy
 
 PATH = "data_path"
 LOGGER = logging.getLogger('preprocessor')
@@ -43,7 +44,7 @@ class Preprocessor:
         self.mapper = Word2VecMapper()
 
 
-    def processSingleDataSetValue(self, value, polarity, output):
+    def processSingleDataSetValue(self, value, polarity, output, objs, flags):
         word_tokens = word_tokenize(value)
         if(self.flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
@@ -61,17 +62,25 @@ class Preprocessor:
         else:
             output.put([" ".join(word_tokens), polarity])
 
-    def processChunk(self, list, output):
-        for value in list:
-            self.processSingleDataSetValue(value[0], value[1], output)
-        print("KURWSKOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo")
+    def processChunk(self, list, output, procId):
+        # objs = {
+        #     'speller' : Speller(),
+        #     'lemmatizer' : Lemmatizer(),
+        #     'stemmer' : nltk.stem.SnowballStemmer('english'),
+        #     'mapper' : Word2VecMapper()
+        # }
+        # flags = copy.copy(self.flags)
+        for idx,value in enumerate(list):
+            if(idx % 100 == 0):
+                LOGGER.debug('{}, done {}/{}'.format(procId, idx, len(list)))
+            self.processSingleDataSetValue(value[0], value[1], output, objs, flags)
 
     def buildWithFlags(self):
         output = mp.Queue()
         offset = int(len(self.data_set)/self.numberOfProcesses)
 
         LOGGER.debug("Distributeing work to processes")
-        processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output)) for x in range(self.numberOfProcesses)]        
+        processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output, x)) for x in range(self.numberOfProcesses)]        
 
         for idx,p in enumerate(processes):
             LOGGER.debug("Staring process {}/{}".format(idx+1, self.numberOfProcesses))
