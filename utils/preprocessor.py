@@ -94,7 +94,11 @@ class Preprocessor:
             p.join()
 
         LOGGER.debug("Calculation finished")
-        results = pd.DataFrame([output.get() for p in processes])
+        # results = pd.DataFrame([output.get() for p in processes])
+        results = pd.DataFrame()
+        while not output.empty():
+            restults = results.append(output.get())
+
         if(self.set):
             results.to_csv(self.config.readValue('processed_data_set'))
         else:
@@ -204,7 +208,7 @@ class Preprocessor:
 
     def preprocessDataSet(self):
         data_set = pd.read_csv(self.config.readValue('data_set_path'))
-        data_set = data_set[1:18]
+        data_set = data_set[1:100]
         self.data_set = data_set['text']
         self.polarities = data_set['polarity']
         self.set = True
@@ -212,6 +216,7 @@ class Preprocessor:
 
     def preprocessTestSet(self):
         data_set = pd.read_csv(self.config.readValue('test_set_path'))
+        data_set = data_set[1:100]
         self.data_set = data_set['text']
         self.polarities = data_set['polarity']
         self.set = False

@@ -32,5 +32,6 @@
     "Automotive"
   ],
   "processed_data_set":"./processed/data_set.csv",
-  "processed_test_set":"./processed/test_set.csv"
+  "processed_test_set":"./processed/test_set.csv",
+  "lstm_model_path":"lstm.pickl"
 }
