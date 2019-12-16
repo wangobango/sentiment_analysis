@@ -46,33 +46,34 @@ class Preprocessor:
 
     def processSingleDataSetValue(self, value, polarity, output, objs, flags):
         word_tokens = word_tokenize(value)
-        if(self.flags['spelling'] == True):
+        if(flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
-            word_tokens = [self.speller.autocorrect_word(word) for word in lenghts]
-        if(self.flags['stopWords'] == True):
-            word_tokens = [w for w in word_tokens if not w in self.englishStopWords]
-        if(self.flags['lemmatize'] == True):
-            word_tokens = [self.lemmatizer.lemmatize(word) for word in word_tokens]
-        if(self.flags['stem'] == True):
-            word_tokens = [self.stemmer.stem(word) for word in word_tokens]
+            word_tokens = [objs['speller'].autocorrect_word(word) for word in lenghts]
+        if(flags['stopWords'] == True):
+            word_tokens = [w for w in word_tokens if not w in objs['stop']]
+        if(flags['lemmatize'] == True):
+            word_tokens = [objs['lemmatizer'].lemmatize(word) for word in word_tokens]
+        if(flags['stem'] == True):
+            word_tokens = [objs['stemmer'].stem(word) for word in word_tokens]
 
         if(EMBEDDING):
             for word in word_tokens:
-                output.put([self.mapper.word2vec(word), polarity])
+                output.put([objs['mapper'].word2vec(word), polarity])
         else:
             output.put([" ".join(word_tokens), polarity])
 
     def processChunk(self, list, output, procId):
-        # objs = {
-        #     'speller' : Speller(),
-        #     'lemmatizer' : Lemmatizer(),
-        #     'stemmer' : nltk.stem.SnowballStemmer('english'),
-        #     'mapper' : Word2VecMapper()
-        # }
-        # flags = copy.copy(self.flags)
+        objs = {
+            'speller' : Speller(),
+            'lemmatizer' : WordNetLemmatizer(),
+            'stemmer' : nltk.stem.SnowballStemmer('english'),
+            'mapper' : Word2VecMapper(),
+            'stop' : set(stopwords.words('english'))
+        }
+        flags = copy.copy(self.flags)
         for idx,value in enumerate(list):
             if(idx % 100 == 0):
-                LOGGER.debug('{}, done {}/{}'.format(procId, idx, len(list)))
+                LOGGER.debug('{}, done {}/{}'.format(procId, idx, int(len(self.data_set)/self.numberOfProcesses)))
             self.processSingleDataSetValue(value[0], value[1], output, objs, flags)
 
     def buildWithFlags(self):
@@ -203,6 +204,7 @@ class Preprocessor:
 
     def preprocessDataSet(self):
         data_set = pd.read_csv(self.config.readValue('data_set_path'))
+        data_set = data_set[1:18]
         self.data_set = data_set['text']
         self.polarities = data_set['polarity']
         self.set = True
@@ -246,5 +248,5 @@ if __name__ == "__main__":
     # print(text)
 
     prep.preprocessDataSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
-    # prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
+    prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
     
