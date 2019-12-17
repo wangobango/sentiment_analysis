@@ -4,6 +4,7 @@ import pickle
 import logging
 import sys
 import spacy
+import copy
 
 # from utils.config import Config
 from keras.models import Sequential
@@ -49,13 +50,13 @@ class LstmModel:
         self.model = Sequential()
         # self.model.add(Embedding(self.vocabulary, self.hidden_size, input_length=self.input_length))
         self.model.add(LSTM(
-                input_shape=(self.sequence_length, EMBEDDING_LENGTH),
+                input_shape=(self.sequence_length, self.hidden_size),
                 stateful=False,
                 units=self.hidden_size,
                 return_sequences=True))
         self.model.add(LSTM(self.hidden_size, return_sequences=True, stateful=False))
         self.model.add(LSTM(self.hidden_size, return_sequences=True, stateful=False))                
-        self.model.add(TimeDistributed(Dense(self.vocabulary)))
+        self.model.add(TimeDistributed(Dense(self.hidden_size)))
         self.model.add(Activation('softmax'))
 
         self.model.compile(loss='mse', optimizer='adam')
@@ -82,23 +83,36 @@ class LstmModel:
     def tempEmbedding(self):
         (X_train, Y_train), (X_test, Y_test) = self.getSplittedData()
         resultX_train, resultY_train, resultX_test, resultY_test = ([],[],[],[])
+        sequenceTrain = []
+        sequenceTest = []
         for items in zip(X_train, Y_train, X_test, Y_test):
-            for value in word_tokenize(items[0]):
-                resultX_train.append(self.nlp(value).vector)
-                if(items[1] == 'positive'):
-                    resultY_train.append(1)
-                else:
-                    resultY_train.append(0)
-            for value in word_tokenize(items[2]):
-                resultX_test.append(self.nlp(value).vector)
-                if(items[3] == 'positive'):
-                    resultY_test.append(1)
-                else:
-                    resultY_test.append(0)
-        resultX_train = np.asarray(resultX_train)
+            for value in zip(items[0], items[1]):
+                for word in word_tokenize(value[0]):
+                    sequenceTrain.append([self.nlp(word).vector, 1 if value[1] == 'positive' else 0])
+
+            for value in zip(items[2], items[3]):
+                for word in word_tokenize(value[0]):
+                    sequenceTest.append([self.nlp(word).vector, 1 if value[1] == 'positive' else 0])
+
+
+            resultX_train.append(copy.copy(sequenceTrain))
+            resultX_test.append(copy.copy(sequenceTest))
+            # for value in word_tokenize(items[0]):
+            #     resultX_train.append(self.nlp(value).vector)
+            #     if(items[1] == 'positive'):
+            #         resultY_train.append(1)
+            #     else:
+            #         resultY_train.append(0)
+            # for value in word_tokenize(items[2]):
+            #     resultX_test.append(self.nlp(value).vector)
+            #     if(items[3] == 'positive'):
+            #         resultY_test.append(1)
+            #     else:
+            #         resultY_test.append(0)
+        # resultX_train = np.asarray(resultX_train)
         # resultX_train = np.reshape(resultX_train, (self.sequence_length, EMBEDDING_LENGTH))
         
-        resultX_test = np.asarray(resultY_test)
+        # resultX_test = np.asarray(resultY_test)
         # resultX_test = np.reshape(resultX_test, (self.sequence_length, EMBEDDING_LENGTH))
 
         return resultX_train, resultY_train, resultX_test, resultY_test
@@ -110,6 +124,6 @@ if __name__ == "__main__":
     lstm = LstmModel(20, 30, 3, 100, 3, EMBEDDING_LENGTH, 30)
     lstm.initModel()
     lstm.summary()
-    # data = lstm.tempEmbedding()
-    # print('dupa')
+    data = lstm.tempEmbedding()
+    print('dupa')
     # lstm.train()

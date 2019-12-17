@@ -19,13 +19,22 @@ import multiprocessing as mp
 import logging
 import sys
 import copy
+import numpy as np
+import spacy
 
 PATH = "data_path"
 LOGGER = logging.getLogger('preprocessor')
-EMBEDDING = False
 
 class Preprocessor:
-    def __init__(self, numberOfProcesses = mp.cpu_count()):
+    def __init__(self, numberOfProcesses = mp.cpu_count()-1, optional_length = None):
+        if "--log" in sys.argv:
+            logging.basicConfig(level=logging.DEBUG)
+        if "-embedding" in sys.argv:
+            self.EMBEDDING = True
+        else:
+            self.EMBEDDING = False
+        self.EMBEDDING_LENGTH = 300
+        self.SEQUENCE_LENGTH = 10
         self.explorer = DataExplorer()
         self.resultsProcessor = ResultsProcessor()
         self.englishStopWords = set(stopwords.words('english')) 
@@ -42,6 +51,8 @@ class Preprocessor:
         self.stemmer = nltk.stem.SnowballStemmer('english')
         self.numberOfProcesses = numberOfProcesses
         self.mapper = Word2VecMapper()
+        self.optional_length = optional_length
+        self.config = Config()
 
 
     def processSingleDataSetValue(self, value, polarity, output, objs, flags):
@@ -56,9 +67,15 @@ class Preprocessor:
         if(flags['stem'] == True):
             word_tokens = [objs['stemmer'].stem(word) for word in word_tokens]
 
-        if(EMBEDDING):
+
+        if(self.EMBEDDING):
+            counter = 0
             for word in word_tokens:
                 output.put([objs['mapper'].word2vec(word), polarity])
+                counter += 1
+            if(counter < self.SEQUENCE_LENGTH):
+                for _ in range(0, self.SEQUENCE_LENGTH - counter):
+                    output.put([np.zeros((self.SEQUENCE_LENGTH,)), polarity])
         else:
             output.put([" ".join(word_tokens), polarity])
 
@@ -72,9 +89,10 @@ class Preprocessor:
         }
         flags = copy.copy(self.flags)
         for idx,value in enumerate(list):
-            if(idx % 100 == 0):
-                LOGGER.debug('{}, done {}/{}'.format(procId, idx, int(len(self.data_set)/self.numberOfProcesses)))
+            if(idx % 1 == 0):
+                LOGGER.debug('{}, done {}/{}'.format(procId, idx+1, int(len(self.data_set)/self.numberOfProcesses)))
             self.processSingleDataSetValue(value[0], value[1], output, objs, flags)
+        LOGGER.debug("{}, finished processing".format(procId))
 
     def buildWithFlags(self):
         output = mp.Queue()
@@ -82,6 +100,7 @@ class Preprocessor:
 
         LOGGER.debug("Distributeing work to processes")
         processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output, x)) for x in range(self.numberOfProcesses)]        
+        self.processes = processes
 
         for idx,p in enumerate(processes):
             LOGGER.debug("Staring process {}/{}".format(idx+1, self.numberOfProcesses))
@@ -97,8 +116,7 @@ class Preprocessor:
         # results = pd.DataFrame([output.get() for p in processes])
         results = pd.DataFrame()
         while not output.empty():
-            restults = results.append(output.get())
-
+            results = results.append(output.get())
         if(self.set):
             results.to_csv(self.config.readValue('processed_data_set'))
         else:
@@ -208,7 +226,8 @@ class Preprocessor:
 
     def preprocessDataSet(self):
         data_set = pd.read_csv(self.config.readValue('data_set_path'))
-        data_set = data_set[1:100]
+        if(self.optional_length != None):
+            data_set = data_set[0:self.optional_length]
         self.data_set = data_set['text']
         self.polarities = data_set['polarity']
         self.set = True
@@ -216,17 +235,15 @@ class Preprocessor:
 
     def preprocessTestSet(self):
         data_set = pd.read_csv(self.config.readValue('test_set_path'))
-        data_set = data_set[1:100]
+        if(self.optional_length != None):
+            data_set = data_set[0:self.optional_length]
         self.data_set = data_set['text']
         self.polarities = data_set['polarity']
         self.set = False
         return self
 
 if __name__ == "__main__":
-    if "--log" in sys.argv:
-        logging.basicConfig(level=logging.DEBUG)
-    if "-embedding" in sys.argv:
-        EMBEDDING = True
+    # TODO returns batched size with self.self.EMBEDDINGs, need to add padding
     """
         @prerequisites:
             directory 'processed' created in root directory of the project
@@ -243,7 +260,7 @@ if __name__ == "__main__":
                 from utils.preprocessor import Preprocessor
                 Preprocessor.aggregateData()
     """
-    prep = Preprocessor()
+    prep = Preprocessor(numberOfProcesses=1, optional_length=18)
     # Example:
     # data = pd.read_csv('./data_set/data_set.csv', nrows=10)
     # example = data['text'][1]
@@ -252,6 +269,6 @@ if __name__ == "__main__":
     # text = prep.setText(example).removeStopWordsDatasetBased().build()
     # print(text)
 
-    prep.preprocessDataSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
-    prep.preprocessTestSet().setStemmingFlag().setLemmatizeFlag().setStopWordsFlag().setCorrectSPelling().buildWithFlags()
+    prep.preprocessDataSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessTestSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
     
