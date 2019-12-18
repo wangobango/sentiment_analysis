@@ -72,13 +72,11 @@ class Preprocessor:
         if(self.EMBEDDING):
             counter = 0
             for word in word_tokens:
-                # output.put([objs['mapper'].word2vec(word), polarity])
-                output.put([word, polarity])
+                output.put([objs['mapper'].word2vec(word), polarity])
                 counter += 1
-            # if(counter < self.SEQUENCE_LENGTH):
-                # for _ in range(0, self.SEQUENCE_LENGTH - counter):
-                    # output.put([np.zeros((self.SEQUENCE_LENGTH,)), polarity])
-                    # output.out(['', polarity])
+            if(counter < self.SEQUENCE_LENGTH):
+                for _ in range(0, self.SEQUENCE_LENGTH - counter):
+                    output.put([np.zeros((self.SEQUENCE_LENGTH,)), polarity])
         else:
             output.put([" ".join(word_tokens), polarity])
 
@@ -272,6 +270,6 @@ if __name__ == "__main__":
     # text = prep.setText(example).removeStopWordsDatasetBased().build()
     # print(text)
 
-    # prep.preprocessDataSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
-    prep.preprocessTestSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessDataSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessTestSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
     
