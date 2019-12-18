@@ -49,6 +49,7 @@ class LstmModel:
         LOGGER.debug("Initializing model")
         self.model = Sequential()
         # self.model.add(Embedding(self.vocabulary, self.hidden_size, input_length=self.input_length))
+        self.model.add(Embedding)
         self.model.add(LSTM(
                 input_shape=(self.sequence_length, self.hidden_size),
                 stateful=False,

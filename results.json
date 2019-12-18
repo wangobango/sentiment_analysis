@@ -1,0 +1,1110 @@
+{
+  "Books": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 704.8643,
+    "meanTextLengthWords": 128.07662,
+    "averageTextLengthWhenPolarityPositiveChars": 711.12296,
+    "averageTextLengthWhenPolarityPositiveWords": 128.33092,
+    "averageTextLengthWhenPolarityNegativeChars": 698.60564,
+    "averageTextLengthWhenPolarityNegativeWords": 127.82232,
+    "averageNumberOfCapitalLettersPolarityPositive": 18.9956,
+    "averageNumberOfCapitalLettersPolarityNegative": 18.99728,
+    "stdDevTextLengthWhenPolarityPositive": 756.4339562981281,
+    "stdDevTextLengthWhenpolarityNegative": 707.3784475372362,
+    "stdDevNumOfCapitalLettersPolarityPositive": 31.76341009148734,
+    "stdDevNumOfCapitalLettersPolarityNegative": 28.259953159932873,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        16844.442398223568,
+        2183.3318194035887
+      ],
+      [
+        2183.3318194035887,
+        903.787663079662
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        16844.442398223568,
+        0.12715254305086768
+      ],
+      [
+        0.12715254305086768,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        0.001959396751143848
+      ],
+      [
+        0.0019593967511438485,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        0.001959396751143848
+      ],
+      [
+        0.0019593967511438485,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 19.36784,
+    "meanPunctuationMarksPolarityNegative": 20.74812
+  },
+  "Movies_TV": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 692.73346,
+    "meanTextLengthWords": 128.27652,
+    "averageTextLengthWhenPolarityPositiveChars": 672.1916,
+    "averageTextLengthWhenPolarityPositiveWords": 123.8246,
+    "averageTextLengthWhenPolarityNegativeChars": 713.27532,
+    "averageTextLengthWhenPolarityNegativeWords": 132.72844,
+    "averageNumberOfCapitalLettersPolarityPositive": 23.34676,
+    "averageNumberOfCapitalLettersPolarityNegative": 24.3702,
+    "stdDevTextLengthWhenPolarityPositive": 787.0466653569151,
+    "stdDevTextLengthWhenpolarityNegative": 749.6541832064286,
+    "stdDevNumOfCapitalLettersPolarityPositive": 43.73199969704564,
+    "stdDevNumOfCapitalLettersPolarityNegative": 39.7434999963516,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        19365.958215853912,
+        2962.489242895259
+      ],
+      [
+        2962.489242895259,
+        1746.3135783611679
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        19365.958215853912,
+        -2.22600452009041
+      ],
+      [
+        -2.22600452009041,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        0.9999999999999998,
+        -0.031991322898233136
+      ],
+      [
+        -0.03199132289823314,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        0.9999999999999998,
+        -0.031991322898233136
+      ],
+      [
+        -0.03199132289823314,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 20.48196,
+    "meanPunctuationMarksPolarityNegative": 22.7196
+  },
+  "Beauty": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 379.48632,
+    "meanTextLengthWords": 73.57852,
+    "averageTextLengthWhenPolarityPositiveChars": 358.89676,
+    "averageTextLengthWhenPolarityPositiveWords": 69.6866,
+    "averageTextLengthWhenPolarityNegativeChars": 400.07588,
+    "averageTextLengthWhenPolarityNegativeWords": 77.47044,
+    "averageNumberOfCapitalLettersPolarityPositive": 11.01644,
+    "averageNumberOfCapitalLettersPolarityNegative": 13.94144,
+    "stdDevTextLengthWhenPolarityPositive": 352.9345759507028,
+    "stdDevTextLengthWhenpolarityNegative": 347.6425968753335,
+    "stdDevNumOfCapitalLettersPolarityPositive": 23.03349061098643,
+    "stdDevNumOfCapitalLettersPolarityNegative": 32.141065488349945,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        4559.4421434524675,
+        663.9711230536612
+      ],
+      [
+        663.9711230536612,
+        783.9494754659083
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        4559.4421434524675,
+        -1.9459989199783965
+      ],
+      [
+        -1.9459989199783965,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        0.9999999999999998,
+        -0.05763846322554442
+      ],
+      [
+        -0.05763846322554442,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        0.9999999999999998,
+        -0.05763846322554442
+      ],
+      [
+        -0.05763846322554442,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 10.9546,
+    "meanPunctuationMarksPolarityNegative": 12.15724
+  },
+  "Clothing_Accessories": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 317.01444,
+    "meanTextLengthWords": 61.73722,
+    "averageTextLengthWhenPolarityPositiveChars": 277.569,
+    "averageTextLengthWhenPolarityPositiveWords": 54.124,
+    "averageTextLengthWhenPolarityNegativeChars": 356.45988,
+    "averageTextLengthWhenPolarityNegativeWords": 69.35044,
+    "averageNumberOfCapitalLettersPolarityPositive": 7.80988,
+    "averageNumberOfCapitalLettersPolarityNegative": 11.29532,
+    "stdDevTextLengthWhenPolarityPositive": 272.56588905987485,
+    "stdDevTextLengthWhenpolarityNegative": 310.7234394608582,
+    "stdDevNumOfCapitalLettersPolarityPositive": 19.361323673385556,
+    "stdDevNumOfCapitalLettersPolarityNegative": 27.204279554834752,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        3270.727581223225,
+        457.69754617892363
+      ],
+      [
+        457.69754617892363,
+        560.5151235424709
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        3270.727581223225,
+        -3.806686133722675
+      ],
+      [
+        -3.806686133722675,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        0.9999999999999999,
+        -0.13312221531244775
+      ],
+      [
+        -0.13312221531244775,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        0.9999999999999999,
+        -0.13312221531244775
+      ],
+      [
+        -0.13312221531244775,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 8.61452,
+    "meanPunctuationMarksPolarityNegative": 10.70564
+  },
+  "Electronics": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": "dupa",
+    "meanTextLengthWords": "dupa",
+    "averageTextLengthWhenPolarityPositiveChars": "dupa",
+    "averageTextLengthWhenPolarityPositiveWords": "dupa",
+    "averageTextLengthWhenPolarityNegativeChars": 539.61528,
+    "averageTextLengthWhenPolarityNegativeWords": 102.71792,
+    "averageNumberOfCapitalLettersPolarityPositive": "dupa",
+    "averageNumberOfCapitalLettersPolarityNegative": 19.28796,
+    "stdDevTextLengthWhenPolarityPositive": "dupa",
+    "stdDevTextLengthWhenpolarityNegative": 494.8083016992759,
+    "stdDevNumOfCapitalLettersPolarityPositive": "dupa",
+    "stdDevNumOfCapitalLettersPolarityNegative": 35.04445632390949,
+    "covBetweenTextLengthAndNumOfCapitalLetters": "dupa",
+    "covBetweenTextLengthAndPolarity": "dupa",
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": "dupa",
+    "personCorBetweenTextLengthAndPolarity": "dupa",
+    "meanPunctuationMarksPolarityPositive": "dupa",
+    "meanPunctuationMarksPolarityNegative": 16.22204
+  },
+  "Patio": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 443.34078,
+    "meanTextLengthWords": 85.36528,
+    "averageTextLengthWhenPolarityPositiveChars": 426.727,
+    "averageTextLengthWhenPolarityPositiveWords": 82.43872,
+    "averageTextLengthWhenPolarityNegativeChars": 459.95456,
+    "averageTextLengthWhenPolarityNegativeWords": 88.29184,
+    "averageNumberOfCapitalLettersPolarityPositive": 11.39408,
+    "averageNumberOfCapitalLettersPolarityNegative": 13.92548,
+    "stdDevTextLengthWhenPolarityPositive": 444.9720571799986,
+    "stdDevTextLengthWhenpolarityNegative": 404.3694786889911,
+    "stdDevNumOfCapitalLettersPolarityPositive": 29.746204815969378,
+    "stdDevNumOfCapitalLettersPolarityNegative": 31.882647424102032,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        6654.825587033349,
+        838.5539266401324
+      ],
+      [
+        838.5539266401324,
+        952.2909961715229
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        6654.825587033349,
+        -1.463309266185324
+      ],
+      [
+        -1.463309266185324,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.03587512611911684
+      ],
+      [
+        -0.03587512611911684,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.03587512611911684
+      ],
+      [
+        -0.03587512611911684,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 11.84488,
+    "meanPunctuationMarksPolarityNegative": 13.12872
+  },
+  "Baby": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 487.17242,
+    "meanTextLengthWords": 95.64422,
+    "averageTextLengthWhenPolarityPositiveChars": 449.00868,
+    "averageTextLengthWhenPolarityPositiveWords": 88.49472,
+    "averageTextLengthWhenPolarityNegativeChars": 525.33616,
+    "averageTextLengthWhenPolarityNegativeWords": 102.79372,
+    "averageNumberOfCapitalLettersPolarityPositive": 10.99812,
+    "averageNumberOfCapitalLettersPolarityNegative": 14.93336,
+    "stdDevTextLengthWhenPolarityPositive": 386.5735089276781,
+    "stdDevTextLengthWhenpolarityNegative": 400.34048463333613,
+    "stdDevNumOfCapitalLettersPolarityPositive": 25.356733947131282,
+    "stdDevNumOfCapitalLettersPolarityNegative": 36.3609367193751,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        5955.651473621067,
+        736.8087271517431
+      ],
+      [
+        736.8087271517431,
+        986.4320948942973
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        5955.651473621067,
+        -3.574821496429938
+      ],
+      [
+        -3.574821496429938,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.0926435900390046
+      ],
+      [
+        -0.0926435900390046,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.0926435900390046
+      ],
+      [
+        -0.0926435900390046,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 12.58636,
+    "meanPunctuationMarksPolarityNegative": 14.73432
+  },
+  "Office_Products": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 447.23062,
+    "meanTextLengthWords": 85.025,
+    "averageTextLengthWhenPolarityPositiveChars": 413.71152,
+    "averageTextLengthWhenPolarityPositiveWords": 78.63924,
+    "averageTextLengthWhenPolarityNegativeChars": 480.74972,
+    "averageTextLengthWhenPolarityNegativeWords": 91.41076,
+    "averageNumberOfCapitalLettersPolarityPositive": 11.74428,
+    "averageNumberOfCapitalLettersPolarityNegative": 15.20024,
+    "stdDevTextLengthWhenPolarityPositive": 435.5493165868701,
+    "stdDevTextLengthWhenpolarityNegative": 421.521880286091,
+    "stdDevNumOfCapitalLettersPolarityPositive": 25.83123859364084,
+    "stdDevNumOfCapitalLettersPolarityNegative": 31.034250497513227,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        6540.323661473238,
+        942.4395822916458
+      ],
+      [
+        942.4395822916458,
+        818.1910743138868
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        6540.323661473238,
+        -3.1929438588771712
+      ],
+      [
+        -3.1929438588771712,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.07896184997218675
+      ],
+      [
+        -0.07896184997218673,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.07896184997218675
+      ],
+      [
+        -0.07896184997218673,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 12.1508,
+    "meanPunctuationMarksPolarityNegative": 14.3704
+  },
+  "Health": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 400.44478,
+    "meanTextLengthWords": 77.0925,
+    "averageTextLengthWhenPolarityPositiveChars": 383.83008,
+    "averageTextLengthWhenPolarityPositiveWords": 74.0702,
+    "averageTextLengthWhenPolarityNegativeChars": 417.05948,
+    "averageTextLengthWhenPolarityNegativeWords": 80.1148,
+    "averageNumberOfCapitalLettersPolarityPositive": 10.74368,
+    "averageNumberOfCapitalLettersPolarityNegative": 13.0818,
+    "stdDevTextLengthWhenPolarityPositive": 369.21236069123364,
+    "stdDevTextLengthWhenpolarityNegative": 386.62129721748335,
+    "stdDevNumOfCapitalLettersPolarityPositive": 20.469780166323233,
+    "stdDevNumOfCapitalLettersPolarityNegative": 30.30299900603899,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        5208.117306096122,
+        712.7554066581329
+      ],
+      [
+        712.7554066581329,
+        670.0219261309229
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        5208.117306096122,
+        -1.511180223604477
+      ],
+      [
+        -1.511180223604477,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.04187950456609599
+      ],
+      [
+        -0.04187950456609599,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.04187950456609599
+      ],
+      [
+        -0.04187950456609599,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 11.1152,
+    "meanPunctuationMarksPolarityNegative": 12.239
+  },
+  "Toys_Games": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 422.57914,
+    "meanTextLengthWords": 82.75044,
+    "averageTextLengthWhenPolarityPositiveChars": 393.73576,
+    "averageTextLengthWhenPolarityPositiveWords": 77.49308,
+    "averageTextLengthWhenPolarityNegativeChars": 451.42252,
+    "averageTextLengthWhenPolarityNegativeWords": 88.0078,
+    "averageNumberOfCapitalLettersPolarityPositive": 11.13008,
+    "averageNumberOfCapitalLettersPolarityNegative": 13.89184,
+    "stdDevTextLengthWhenPolarityPositive": 349.6884141306692,
+    "stdDevTextLengthWhenpolarityNegative": 349.68845093432753,
+    "stdDevNumOfCapitalLettersPolarityPositive": 29.968109036000254,
+    "stdDevNumOfCapitalLettersPolarityNegative": 33.987166716488744,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        4589.7306744198895,
+        570.8687325522513
+      ],
+      [
+        570.8687325522513,
+        1028.5349305770117
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        4589.7306744198895,
+        -2.6287325746514862
+      ],
+      [
+        -2.6287325746514862,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.07760299069484032
+      ],
+      [
+        -0.07760299069484032,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.07760299069484032
+      ],
+      [
+        -0.07760299069484032,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 11.53068,
+    "meanPunctuationMarksPolarityNegative": 13.37296
+  },
+  "Pet_Supplies": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 448.08956,
+    "meanTextLengthWords": 87.71096,
+    "averageTextLengthWhenPolarityPositiveChars": 421.61992,
+    "averageTextLengthWhenPolarityPositiveWords": 82.94252,
+    "averageTextLengthWhenPolarityNegativeChars": 474.5592,
+    "averageTextLengthWhenPolarityNegativeWords": 92.4794,
+    "averageNumberOfCapitalLettersPolarityPositive": 10.8384,
+    "averageNumberOfCapitalLettersPolarityNegative": 13.31072,
+    "stdDevTextLengthWhenPolarityPositive": 388.4693280288594,
+    "stdDevTextLengthWhenpolarityNegative": 435.57543320917443,
+    "stdDevNumOfCapitalLettersPolarityPositive": 23.76013395248436,
+    "stdDevNumOfCapitalLettersPolarityNegative": 28.93575388825389,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        6415.980455487506,
+        757.2014548514968
+      ],
+      [
+        757.2014548514968,
+        702.4530498673977
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        6415.980455487506,
+        -2.38426768535371
+      ],
+      [
+        -2.38426768535371,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.05953181852865329
+      ],
+      [
+        -0.05953181852865329,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.05953181852865329
+      ],
+      [
+        -0.05953181852865329,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 11.9628,
+    "meanPunctuationMarksPolarityNegative": 13.48532
+  },
+  "Tools_Home_Improvement": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 447.3514,
+    "meanTextLengthWords": 85.86098,
+    "averageTextLengthWhenPolarityPositiveChars": 412.69944,
+    "averageTextLengthWhenPolarityPositiveWords": 79.31,
+    "averageTextLengthWhenPolarityNegativeChars": 482.00336,
+    "averageTextLengthWhenPolarityNegativeWords": 92.41196,
+    "averageNumberOfCapitalLettersPolarityPositive": 11.04164,
+    "averageNumberOfCapitalLettersPolarityNegative": 14.28528,
+    "stdDevTextLengthWhenPolarityPositive": 442.6922354680353,
+    "stdDevTextLengthWhenpolarityNegative": 429.0036970338489,
+    "stdDevNumOfCapitalLettersPolarityPositive": 24.23018749639383,
+    "stdDevNumOfCapitalLettersPolarityNegative": 33.06712287637979,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        6964.327499989597,
+        860.7435490801811
+      ],
+      [
+        860.7435490801811,
+        842.9154591375828
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        6964.327499989597,
+        -3.275555511110227
+      ],
+      [
+        -3.275555511110227,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        0.9999999999999998,
+        -0.07850024707083748
+      ],
+      [
+        -0.07850024707083748,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        0.9999999999999998,
+        -0.07850024707083748
+      ],
+      [
+        -0.07850024707083748,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 11.49884,
+    "meanPunctuationMarksPolarityNegative": 13.6996
+  },
+  "Sports_Outdoors": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 402.33344,
+    "meanTextLengthWords": 78.0589,
+    "averageTextLengthWhenPolarityPositiveChars": 368.87,
+    "averageTextLengthWhenPolarityPositiveWords": 71.7142,
+    "averageTextLengthWhenPolarityNegativeChars": 435.79688,
+    "averageTextLengthWhenPolarityNegativeWords": 84.4036,
+    "averageNumberOfCapitalLettersPolarityPositive": 9.58732,
+    "averageNumberOfCapitalLettersPolarityNegative": 12.82376,
+    "stdDevTextLengthWhenPolarityPositive": 405.4281569649548,
+    "stdDevTextLengthWhenpolarityNegative": 392.8791350304386,
+    "stdDevNumOfCapitalLettersPolarityPositive": 20.111846638675424,
+    "stdDevNumOfCapitalLettersPolarityNegative": 26.080883026891556,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        5962.9496897837935,
+        717.6577468489368
+      ],
+      [
+        717.6577468489368,
+        544.978952887458
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        5962.9496897837935,
+        -3.1724134482689657
+      ],
+      [
+        -3.1724134482689657,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.08216462213735322
+      ],
+      [
+        -0.08216462213735322,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.08216462213735322
+      ],
+      [
+        -0.08216462213735322,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 10.66476,
+    "meanPunctuationMarksPolarityNegative": 12.54128
+  },
+  "Amazon_Instant_Video": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 664.22562,
+    "meanTextLengthWords": 123.0082,
+    "averageTextLengthWhenPolarityPositiveChars": 621.673,
+    "averageTextLengthWhenPolarityPositiveWords": 114.52952,
+    "averageTextLengthWhenPolarityNegativeChars": 706.77824,
+    "averageTextLengthWhenPolarityNegativeWords": 131.48688,
+    "averageNumberOfCapitalLettersPolarityPositive": 20.98204,
+    "averageNumberOfCapitalLettersPolarityNegative": 23.0822,
+    "stdDevTextLengthWhenPolarityPositive": 774.358229342854,
+    "stdDevTextLengthWhenpolarityNegative": 792.2252167802426,
+    "stdDevNumOfCapitalLettersPolarityPositive": 37.63547418909983,
+    "stdDevNumOfCapitalLettersPolarityNegative": 41.393958051387166,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        20264.496982699664,
+        3058.583128278566
+      ],
+      [
+        3058.583128278566,
+        1566.0783298721972
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        20264.496982699664,
+        -4.239424788495771
+      ],
+      [
+        -4.239424788495771,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.05956136931123109
+      ],
+      [
+        -0.0595613693112311,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.05956136931123109
+      ],
+      [
+        -0.0595613693112311,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 19.01048,
+    "meanPunctuationMarksPolarityNegative": 22.61156
+  },
+  "Shoes": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 354.13904,
+    "meanTextLengthWords": 68.77366,
+    "averageTextLengthWhenPolarityPositiveChars": 327.27728,
+    "averageTextLengthWhenPolarityPositiveWords": 63.21688,
+    "averageTextLengthWhenPolarityNegativeChars": 381.0008,
+    "averageTextLengthWhenPolarityNegativeWords": 74.33044,
+    "averageNumberOfCapitalLettersPolarityPositive": 10.25208,
+    "averageNumberOfCapitalLettersPolarityNegative": 12.09968,
+    "stdDevTextLengthWhenPolarityPositive": 310.78974641355467,
+    "stdDevTextLengthWhenpolarityNegative": 402.5623269996337,
+    "stdDevNumOfCapitalLettersPolarityPositive": 21.866249236519735,
+    "stdDevNumOfCapitalLettersPolarityNegative": 25.616553708444076,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        4859.641103026458,
+        745.2223331258624
+      ],
+      [
+        745.2223331258624,
+        568.0351069277389
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        4859.641103026458,
+        -2.7784455689113736
+      ],
+      [
+        -2.7784455689113736,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.07971231966830966
+      ],
+      [
+        -0.07971231966830965,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.07971231966830966
+      ],
+      [
+        -0.07971231966830965,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 9.86668,
+    "meanPunctuationMarksPolarityNegative": 11.1558
+  },
+  "Music": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 600.93816,
+    "meanTextLengthWords": 113.19304,
+    "averageTextLengthWhenPolarityPositiveChars": 607.3294,
+    "averageTextLengthWhenPolarityPositiveWords": 114.05088,
+    "averageTextLengthWhenPolarityNegativeChars": 594.54692,
+    "averageTextLengthWhenPolarityNegativeWords": 112.3352,
+    "averageNumberOfCapitalLettersPolarityPositive": 28.04492,
+    "averageNumberOfCapitalLettersPolarityNegative": 25.6722,
+    "stdDevTextLengthWhenPolarityPositive": 623.1539235338569,
+    "stdDevTextLengthWhenpolarityNegative": 583.4101090301003,
+    "stdDevNumOfCapitalLettersPolarityPositive": 54.545008407677415,
+    "stdDevNumOfCapitalLettersPolarityNegative": 47.8816234808303,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        12330.53538626612,
+        2386.6145358683184
+      ],
+      [
+        2386.6145358683184,
+        2635.364062007639
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        12330.53538626612,
+        0.42892857857157
+      ],
+      [
+        0.42892857857157,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        0.9999999999999999,
+        0.007725376764419644
+      ],
+      [
+        0.007725376764419645,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        0.9999999999999999,
+        0.007725376764419644
+      ],
+      [
+        0.007725376764419645,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 22.61408,
+    "meanPunctuationMarksPolarityNegative": 21.78604
+  },
+  "Video_Games": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": "dupa",
+    "meanTextLengthWords": "dupa",
+    "averageTextLengthWhenPolarityPositiveChars": "dupa",
+    "averageTextLengthWhenPolarityPositiveWords": "dupa",
+    "averageTextLengthWhenPolarityNegativeChars": 613.72984,
+    "averageTextLengthWhenPolarityNegativeWords": 117.50692,
+    "averageNumberOfCapitalLettersPolarityPositive": "dupa",
+    "averageNumberOfCapitalLettersPolarityNegative": 21.73968,
+    "stdDevTextLengthWhenPolarityPositive": "dupa",
+    "stdDevTextLengthWhenpolarityNegative": 679.1714235254414,
+    "stdDevNumOfCapitalLettersPolarityPositive": "dupa",
+    "stdDevNumOfCapitalLettersPolarityNegative": 38.09472500881979,
+    "covBetweenTextLengthAndNumOfCapitalLetters": "dupa",
+    "covBetweenTextLengthAndPolarity": "dupa",
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": "dupa",
+    "personCorBetweenTextLengthAndPolarity": "dupa",
+    "meanPunctuationMarksPolarityPositive": "dupa",
+    "meanPunctuationMarksPolarityNegative": 19.00232
+  },
+  "Software": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 609.28612,
+    "meanTextLengthWords": 113.39036,
+    "averageTextLengthWhenPolarityPositiveChars": 575.79156,
+    "averageTextLengthWhenPolarityPositiveWords": 107.278,
+    "averageTextLengthWhenPolarityNegativeChars": 642.78068,
+    "averageTextLengthWhenPolarityNegativeWords": 119.50272,
+    "averageNumberOfCapitalLettersPolarityPositive": 19.70244,
+    "averageNumberOfCapitalLettersPolarityNegative": 24.02172,
+    "stdDevTextLengthWhenPolarityPositive": 619.8706266575037,
+    "stdDevTextLengthWhenpolarityNegative": 563.0479078894953,
+    "stdDevNumOfCapitalLettersPolarityPositive": 33.44614264823972,
+    "stdDevNumOfCapitalLettersPolarityNegative": 33.76240228777567,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        11800.062620322815,
+        2101.7566335838715
+      ],
+      [
+        2101.7566335838715,
+        1133.9588572507453
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        11800.062620322815,
+        -3.056241124822495
+      ],
+      [
+        -3.056241124822495,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        1.0,
+        -0.05626924810653525
+      ],
+      [
+        -0.05626924810653525,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        1.0,
+        -0.05626924810653525
+      ],
+      [
+        -0.05626924810653525,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 16.76584,
+    "meanPunctuationMarksPolarityNegative": 19.49376
+  },
+  "Home_Kitchen": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 444.95486,
+    "meanTextLengthWords": 85.73074,
+    "averageTextLengthWhenPolarityPositiveChars": 403.58432,
+    "averageTextLengthWhenPolarityPositiveWords": 78.23032,
+    "averageTextLengthWhenPolarityNegativeChars": 486.3254,
+    "averageTextLengthWhenPolarityNegativeWords": 93.23116,
+    "averageNumberOfCapitalLettersPolarityPositive": 10.7138,
+    "averageNumberOfCapitalLettersPolarityNegative": 14.02224,
+    "stdDevTextLengthWhenPolarityPositive": 419.08846838124475,
+    "stdDevTextLengthWhenpolarityNegative": 424.80920629717997,
+    "stdDevNumOfCapitalLettersPolarityPositive": 22.059529676763283,
+    "stdDevNumOfCapitalLettersPolarityNegative": 29.171266434325407,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        6558.142961911637,
+        819.6879268237367
+      ],
+      [
+        819.6879268237367,
+        671.5426921334425
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        6558.142961911637,
+        -3.7502850057001105
+      ],
+      [
+        -3.7502850057001105,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        0.9999999999999998,
+        -0.0926188717665375
+      ],
+      [
+        -0.09261887176653752,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        0.9999999999999998,
+        -0.0926188717665375
+      ],
+      [
+        -0.09261887176653752,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 11.83852,
+    "meanPunctuationMarksPolarityNegative": 14.21096
+  },
+  "Automotive": {
+    "numberOfPositives": 25000,
+    "numberOfNegatives": 25000,
+    "positiveToNegativeRatio": 1.0,
+    "meanTextLengthCharacters": 380.79572,
+    "meanTextLengthWords": 73.31616,
+    "averageTextLengthWhenPolarityPositiveChars": 356.38852,
+    "averageTextLengthWhenPolarityPositiveWords": 68.51308,
+    "averageTextLengthWhenPolarityNegativeChars": 405.20292,
+    "averageTextLengthWhenPolarityNegativeWords": 78.11924,
+    "averageNumberOfCapitalLettersPolarityPositive": 10.98284,
+    "averageNumberOfCapitalLettersPolarityNegative": 13.908,
+    "stdDevTextLengthWhenPolarityPositive": 362.7035534044429,
+    "stdDevTextLengthWhenpolarityNegative": 359.11183124964515,
+    "stdDevNumOfCapitalLettersPolarityPositive": 28.152967615056145,
+    "stdDevNumOfCapitalLettersPolarityNegative": 33.1245023509788,
+    "covBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        4775.123425322908,
+        707.9744355015098
+      ],
+      [
+        707.9744355015098,
+        947.069202407648
+      ]
+    ],
+    "covBetweenTextLengthAndPolarity": [
+      [
+        4775.123425322908,
+        -2.4015880317606344
+      ],
+      [
+        -2.4015880317606344,
+        0.25000500010000204
+      ]
+    ],
+    "personCorBetweenTextLengthAndNumOfCapitalLetters": [
+      [
+        0.9999999999999998,
+        -0.06950753107382836
+      ],
+      [
+        -0.06950753107382836,
+        1.0
+      ]
+    ],
+    "personCorBetweenTextLengthAndPolarity": [
+      [
+        0.9999999999999998,
+        -0.06950753107382836
+      ],
+      [
+        -0.06950753107382836,
+        1.0
+      ]
+    ],
+    "meanPunctuationMarksPolarityPositive": 9.82,
+    "meanPunctuationMarksPolarityNegative": 11.39388
+  }
+}
