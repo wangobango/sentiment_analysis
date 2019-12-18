@@ -56,6 +56,7 @@ class Preprocessor:
 
 
     def processSingleDataSetValue(self, value, polarity, output, objs, flags):
+        output.cancel_join_thread()
         word_tokens = word_tokenize(value)
         if(flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
@@ -269,6 +270,6 @@ if __name__ == "__main__":
     # text = prep.setText(example).removeStopWordsDatasetBased().build()
     # print(text)
 
-    prep.preprocessDataSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
-    prep.preprocessTestSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    # prep.preprocessDataSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessTestSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
     
