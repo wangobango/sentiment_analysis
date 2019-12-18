@@ -56,6 +56,7 @@ class Preprocessor:
 
 
     def processSingleDataSetValue(self, value, polarity, output, objs, flags):
+        output.cancel_join_thread()
         word_tokens = word_tokenize(value)
         if(flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
@@ -71,13 +72,11 @@ class Preprocessor:
         if(self.EMBEDDING):
             counter = 0
             for word in word_tokens:
-                # output.put([objs['mapper'].word2vec(word), polarity])
-                output.put([word, polarity])
+                output.put([objs['mapper'].word2vec(word), polarity])
                 counter += 1
-            # if(counter < self.SEQUENCE_LENGTH):
-                # for _ in range(0, self.SEQUENCE_LENGTH - counter):
-                    # output.put([np.zeros((self.SEQUENCE_LENGTH,)), polarity])
-                    # output.out(['', polarity])
+            if(counter < self.SEQUENCE_LENGTH):
+                for _ in range(0, self.SEQUENCE_LENGTH - counter):
+                    output.put([np.zeros((self.SEQUENCE_LENGTH,)), polarity])
         else:
             output.put([" ".join(word_tokens), polarity])
 
