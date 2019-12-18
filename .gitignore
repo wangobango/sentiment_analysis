@@ -5,7 +5,6 @@ data_set
 __pycache*
 aggregated/*.csv
 plots/*
-results.json
 absa_data/*
 .idea/*
 *.pickle
