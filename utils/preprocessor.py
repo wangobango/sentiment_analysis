@@ -262,7 +262,7 @@ if __name__ == "__main__":
                 from utils.preprocessor import Preprocessor
                 Preprocessor.aggregateData()
     """
-    prep = Preprocessor(numberOfProcesses=1, optional_length=18)
+    prep = Preprocessor(numberOfProcesses=3, optional_length=999)
     # Example:
     # data = pd.read_csv('./data_set/data_set.csv', nrows=10)
     # example = data['text'][1]
@@ -271,6 +271,9 @@ if __name__ == "__main__":
     # text = prep.setText(example).removeStopWordsDatasetBased().build()
     # print(text)
 
-    prep.preprocessDataSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
-    prep.preprocessTestSet().setCorrectSPelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+
+    # TODO find other spelling correcter
+    # TODO threads not joining afther being finished
+    prep.preprocessDataSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessTestSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
     
