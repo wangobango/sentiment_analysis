@@ -56,7 +56,6 @@ class Preprocessor:
 
 
     def processSingleDataSetValue(self, value, polarity, output, objs, flags):
-        output.cancel_join_thread()
         word_tokens = word_tokenize(value)
         if(flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
@@ -72,13 +71,13 @@ class Preprocessor:
         if(self.EMBEDDING):
             counter = 0
             for word in word_tokens:
-                output.put([objs['mapper'].word2vec(word), polarity])
+                output.put([objs['mapper'].word2vec(word), 1 if polarity == 'positive' else 0])
                 counter += 1
             if(counter < self.SEQUENCE_LENGTH):
                 for _ in range(0, self.SEQUENCE_LENGTH - counter):
-                    output.put([np.zeros((self.SEQUENCE_LENGTH,)), polarity])
+                    output.put([np.zeros((self.EMBEDDING_LENGTH,)), 1 if polarity == 'positive' else 0])
         else:
-            output.put([" ".join(word_tokens), polarity])
+            output.put([" ".join(word_tokens), 1 if polarity == 'positive' else 0])
 
     def processChunk(self, list, output, procId):
         objs = {
@@ -90,10 +89,11 @@ class Preprocessor:
         }
         flags = copy.copy(self.flags)
         for idx,value in enumerate(list):
-            if(idx % 1 == 0):
+            if(idx % 10 == 0):
                 LOGGER.debug('{}, done {}/{}'.format(procId, idx+1, int(len(self.data_set)/self.numberOfProcesses)))
             self.processSingleDataSetValue(value[0], value[1], output, objs, flags)
         LOGGER.debug("{}, finished processing".format(procId))
+        output.cancel_join_thread()
 
     def buildWithFlags(self):
         output = mp.Queue()
@@ -115,13 +115,14 @@ class Preprocessor:
 
         LOGGER.debug("Calculation finished")
         # results = pd.DataFrame([output.get() for p in processes])
-        results = pd.DataFrame()
+        results = pd.DataFrame(columns = ['embedding', 'polarity'])
         while not output.empty():
-            results = results.append(output.get())
+            value = output.get()
+            results = results.append({ 'embedding' : value[0], 'polarity': value[1] }, ignore_index = True)
         if(self.set):
-            results.to_csv(self.config.readValue('processed_data_set'))
+            results.to_csv(self.config.readValue('processed_data_set'), sep = ";")
         else:
-            results.to_csv(self.config.readValue('processed_test_set'))
+            results.to_csv(self.config.readValue('processed_test_set'), sep = ";")
 
     def setCorrectSPelling(self):
         self.flags['spelling'] = True
@@ -261,7 +262,7 @@ if __name__ == "__main__":
                 from utils.preprocessor import Preprocessor
                 Preprocessor.aggregateData()
     """
-    prep = Preprocessor(numberOfProcesses=3, optional_length=999)
+    prep = Preprocessor(numberOfProcesses=1, optional_length=2)
     # Example:
     # data = pd.read_csv('./data_set/data_set.csv', nrows=10)
     # example = data['text'][1]
@@ -273,6 +274,7 @@ if __name__ == "__main__":
 
     # TODO find other spelling correcter
     # TODO threads not joining afther being finished
-    prep.preprocessDataSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
-    prep.preprocessTestSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    # TODO for some reason there are always the same amount of rows saved lol . fix it 
+    prep.preprocessDataSet().correctSpelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessTestSet().correctSpelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
     
