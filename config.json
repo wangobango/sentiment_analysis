@@ -33,5 +33,7 @@
   ],
   "processed_data_set":"./processed/data_set.csv",
   "processed_test_set":"./processed/test_set.csv",
+  "bert_dev_set":"./huggingfaces/dev_set.tsv",
+  "bert_test_set":"./huggingfaces/test_set.tsv",
   "lstm_model_path":"lstm.pickl"
 }
