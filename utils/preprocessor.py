@@ -11,6 +11,7 @@ from autocorrect import Speller
 from .config import Config
 from console_progressbar import ProgressBar
 from .word2vec_mapper import Word2VecMapper
+import time
 import os
 import pandas as pd
 import re
@@ -34,7 +35,8 @@ class Preprocessor:
         else:
             self.EMBEDDING = False
         self.EMBEDDING_LENGTH = 300
-        self.SEQUENCE_LENGTH = 10
+        self.SEQUENCE_LENGTH = 100
+        self.TIMEOUT = 60
         self.explorer = DataExplorer()
         self.resultsProcessor = ResultsProcessor()
         self.englishStopWords = set(stopwords.words('english')) 
@@ -93,11 +95,12 @@ class Preprocessor:
                 LOGGER.debug('{}, done {}/{}'.format(procId, idx+1, int(len(self.data_set)/self.numberOfProcesses)))
             self.processSingleDataSetValue(value[0], value[1], output, objs, flags)
         LOGGER.debug("{}, finished processing".format(procId))
-        output.cancel_join_thread()
+        # output.cancel_join_thread()
 
     def buildWithFlags(self):
         output = mp.Queue()
         offset = int(len(self.data_set)/self.numberOfProcesses)
+        results = pd.DataFrame(columns = ['embedding', 'polarity'])
 
         LOGGER.debug("Distributeing work to processes")
         processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output, x)) for x in range(self.numberOfProcesses)]        
@@ -107,6 +110,35 @@ class Preprocessor:
             LOGGER.debug("Staring process {}/{}".format(idx+1, self.numberOfProcesses))
             p.start()
 
+
+        if(self.EMBEDDING):
+            numberOfItems = offset * self.numberOfProcesses * self.SEQUENCE_LENGTH
+        else:
+            numberOfItems = offset * self.numberOfProcesses
+        elapsed = 0
+        counter = 0
+        time.sleep(5)
+        start_time = time.time()
+        LOGGER.debug("Consumeing output")
+        while counter < numberOfItems:
+            if(not output.empty()):
+                if(counter % 10 == 0):
+                    LOGGER.debug("Output size: {}".format(output.qsize()))
+                elapsed = 0
+                start_time = time.time()
+                counter += 1
+                value = output.get()
+                results = results.append({ 'embedding' : value[0], 'polarity': value[1] }, ignore_index = True)
+            else:
+                current_time = time.time()
+                elapsed += current_time - start_time
+                start_time = current_time
+            
+            if(elapsed >= self.TIMEOUT):
+                LOGGER.debug("Timeout! Output size is {}, time elapsed: {}".format(output.qsize(), elapsed))
+                break
+
+
         LOGGER.debug("Joining threads")
 
         for idx,p in enumerate(processes):
@@ -115,7 +147,7 @@ class Preprocessor:
 
         LOGGER.debug("Calculation finished")
         # results = pd.DataFrame([output.get() for p in processes])
-        results = pd.DataFrame(columns = ['embedding', 'polarity'])
+        # results = pd.DataFrame(columns = ['embedding', 'polarity'])
         while not output.empty():
             value = output.get()
             results = results.append({ 'embedding' : value[0], 'polarity': value[1] }, ignore_index = True)
@@ -262,7 +294,7 @@ if __name__ == "__main__":
                 from utils.preprocessor import Preprocessor
                 Preprocessor.aggregateData()
     """
-    prep = Preprocessor(numberOfProcesses=1, optional_length=2)
+    prep = Preprocessor(numberOfProcesses=3, optional_length=21)
     # Example:
     # data = pd.read_csv('./data_set/data_set.csv', nrows=10)
     # example = data['text'][1]
