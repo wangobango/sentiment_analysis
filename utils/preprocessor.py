@@ -48,7 +48,7 @@ class Preprocessor:
             'lemmatize':False,
             'stem':False,
         }
-        self.speller = Speller()
+        # self.speller = Speller()
         self.lemmatizer = WordNetLemmatizer()
         self.stemmer = nltk.stem.SnowballStemmer('english')
         self.numberOfProcesses = numberOfProcesses
@@ -83,7 +83,7 @@ class Preprocessor:
 
     def processChunk(self, list, output, procId):
         objs = {
-            'speller' : Speller(),
+            # 'speller' : Speller(),
             'lemmatizer' : WordNetLemmatizer(),
             'stemmer' : nltk.stem.SnowballStemmer('english'),
             'mapper' : Word2VecMapper(),
@@ -294,7 +294,7 @@ if __name__ == "__main__":
                 from utils.preprocessor import Preprocessor
                 Preprocessor.aggregateData()
     """
-    prep = Preprocessor(numberOfProcesses=3, optional_length=21)
+    prep = Preprocessor()
     # Example:
     # data = pd.read_csv('./data_set/data_set.csv', nrows=10)
     # example = data['text'][1]
@@ -307,6 +307,6 @@ if __name__ == "__main__":
     # TODO find other spelling correcter
     # TODO threads not joining afther being finished
     # TODO for some reason there are always the same amount of rows saved lol . fix it 
-    prep.preprocessDataSet().correctSpelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
-    prep.preprocessTestSet().correctSpelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessDataSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessTestSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
     
