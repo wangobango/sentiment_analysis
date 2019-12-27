@@ -36,7 +36,8 @@ class Preprocessor:
             self.EMBEDDING = False
         self.EMBEDDING_LENGTH = 300
         self.SEQUENCE_LENGTH = 100
-        self.TIMEOUT = 60
+        self.TIMEOUT = 15
+        self.OVERHEAD_TIMEOUT = 45
         self.explorer = DataExplorer()
         self.resultsProcessor = ResultsProcessor()
         self.englishStopWords = set(stopwords.words('english')) 
@@ -75,9 +76,9 @@ class Preprocessor:
             for word in word_tokens:
                 output.put([id, objs['mapper'].word2vec(word), 1 if polarity == 'positive' else 0])
                 counter += 1
-            if(counter < self.SEQUENCE_LENGTH):
-                for _ in range(0, self.SEQUENCE_LENGTH - counter):
-                    output.put([id, np.zeros((self.EMBEDDING_LENGTH,)), 1 if polarity == 'positive' else 0])
+            # if(counter < self.SEQUENCE_LENGTH):
+            #     for _ in range(0, self.SEQUENCE_LENGTH - counter):
+            #         output.put([id, np.zeros((self.EMBEDDING_LENGTH,)), 1 if polarity == 'positive' else 0])
         else:
             output.put([id, " ".join(word_tokens), 1 if polarity == 'positive' else 0])
 
@@ -100,7 +101,7 @@ class Preprocessor:
     def buildWithFlags(self):
         output = mp.Queue()
         offset = int(len(self.data_set)/self.numberOfProcesses)
-        results = pd.DataFrame(columns = ['embedding', 'polarity'])
+        results = pd.DataFrame(columns = ['id', 'embedding', 'polarity'])
 
         LOGGER.debug("Distributeing work to processes")
         processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset], self.ids[x*offset:(x+1)*offset]), output, x)) for x in range(self.numberOfProcesses)]        
@@ -117,7 +118,7 @@ class Preprocessor:
             numberOfItems = offset * self.numberOfProcesses
         elapsed = 0
         counter = 0
-        time.sleep(5)
+        time.sleep(self.OVERHEAD_TIMEOUT)
         start_time = time.time()
         LOGGER.debug("Consumeing output")
         # while counter < numberOfItems:
@@ -129,7 +130,7 @@ class Preprocessor:
                 start_time = time.time()
                 counter += 1
                 value = output.get()
-                results = results.append({ 'embedding' : value[0], 'polarity': value[1] }, ignore_index = True)
+                results = results.append({'id': value[0], 'embedding' : value[1], 'polarity': value[2] }, ignore_index = True)
             else:
                 current_time = time.time()
                 elapsed += current_time - start_time
@@ -297,7 +298,7 @@ if __name__ == "__main__":
                 from utils.preprocessor import Preprocessor
                 Preprocessor.aggregateData()
     """
-    prep = Preprocessor(numberOfProcesses=3, optional_length=21)
+    prep = Preprocessor(numberOfProcesses=6, optional_length=24)
     # Example:
     # data = pd.read_csv('./data_set/data_set.csv', nrows=10)
     # example = data['text'][1]
