@@ -57,7 +57,7 @@ class Preprocessor:
         self.config = Config()
 
 
-    def processSingleDataSetValue(self, value, polarity, output, objs, flags):
+    def processSingleDataSetValue(self, value, polarity, id,  output, objs, flags):
         word_tokens = word_tokenize(value)
         if(flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
@@ -73,13 +73,13 @@ class Preprocessor:
         if(self.EMBEDDING):
             counter = 0
             for word in word_tokens:
-                output.put([objs['mapper'].word2vec(word), 1 if polarity == 'positive' else 0])
+                output.put([id, objs['mapper'].word2vec(word), 1 if polarity == 'positive' else 0])
                 counter += 1
             if(counter < self.SEQUENCE_LENGTH):
                 for _ in range(0, self.SEQUENCE_LENGTH - counter):
-                    output.put([np.zeros((self.EMBEDDING_LENGTH,)), 1 if polarity == 'positive' else 0])
+                    output.put([id, np.zeros((self.EMBEDDING_LENGTH,)), 1 if polarity == 'positive' else 0])
         else:
-            output.put([" ".join(word_tokens), 1 if polarity == 'positive' else 0])
+            output.put([id, " ".join(word_tokens), 1 if polarity == 'positive' else 0])
 
     def processChunk(self, list, output, procId):
         objs = {
@@ -93,7 +93,7 @@ class Preprocessor:
         for idx,value in enumerate(list):
             if(idx % 10 == 0):
                 LOGGER.debug('{}, done {}/{}'.format(procId, idx+1, int(len(self.data_set)/self.numberOfProcesses)))
-            self.processSingleDataSetValue(value[0], value[1], output, objs, flags)
+            self.processSingleDataSetValue(value[0], value[1], value[2], output, objs, flags)
         LOGGER.debug("{}, finished processing".format(procId))
         # output.cancel_join_thread()
 
@@ -103,7 +103,7 @@ class Preprocessor:
         results = pd.DataFrame(columns = ['embedding', 'polarity'])
 
         LOGGER.debug("Distributeing work to processes")
-        processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset]), output, x)) for x in range(self.numberOfProcesses)]        
+        processes = [mp.Process(target=self.processChunk, args=(zip(self.data_set[x*offset:(x+1)*offset], self.polarities[x*offset:(x+1)*offset], self.ids[x*offset:(x+1)*offset]), output, x)) for x in range(self.numberOfProcesses)]        
         self.processes = processes
 
         for idx,p in enumerate(processes):
@@ -120,7 +120,8 @@ class Preprocessor:
         time.sleep(5)
         start_time = time.time()
         LOGGER.debug("Consumeing output")
-        while counter < numberOfItems:
+        # while counter < numberOfItems:
+        while True:
             if(not output.empty()):
                 if(counter % 10 == 0):
                     LOGGER.debug("Output size: {}".format(output.qsize()))
@@ -264,6 +265,7 @@ class Preprocessor:
             data_set = data_set[0:self.optional_length]
         self.data_set = data_set['text']
         self.polarities = data_set['polarity']
+        self.ids = data_set['id']
         self.set = True
         return self
 
@@ -273,6 +275,7 @@ class Preprocessor:
             data_set = data_set[0:self.optional_length]
         self.data_set = data_set['text']
         self.polarities = data_set['polarity']
+        self.ids = data_set['id']
         self.set = False
         return self
 
