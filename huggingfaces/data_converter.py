@@ -22,10 +22,17 @@ class InputFeatures(object):
         self.segment_ids = segment_ids
         self.label_id = label_id
 
+    def __str__(self):
+        return "\ninput_ids: {}\ninput_mask: {}\nsegment_ids: {}\nlabel_id: {}"\
+            .format(self.input_ids, self.input_mask, self.segment_ids, self.label_id)
+
+    def __repr__(self):
+        return "\ninput_ids: {}\ninput_mask: {}\nsegment_ids: {}\nlabel_id: {}"\
+            .format(self.input_ids, self.input_mask, self.segment_ids, self.label_id)
+
 class BertDataConverter():
     def __init__(self):
         self.config = Config()
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-cased', do_lower_case=False)
 
     def get_dev_examples(self):
         dev_set = self.read_tsv(self.config.readValue('bert_dev_set'), "dev")
@@ -45,29 +52,36 @@ class BertDataConverter():
                 lines.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
             return lines
 
-    def convert_example_to_features(self, example):
-        max_seq_length = 512
-        tokenizer = self.tokenizer
-        tokens = tokenizer.tokenize(example.text_a)
-        if len(tokens) > max_seq_length - 2: # -2 for [CLS] and [SEP]
-            tokens = tokens[:(max_seq_length - 2)]
-        tokens = ["[CLS]"] + tokens + ["[SEP]"]
-        segment_ids = [0] * len(tokens)
-        input_ids = tokenizer.convert_tokens_to_ids(tokens)
-        input_mask = [1] * len(tokens)
-        padding = [0] * (max_seq_length - len(input_ids))
-        input_ids += padding
-        input_mask += padding
-        segment_ids += padding
-        label_id = example.label
-        return InputFeatures(input_ids=input_ids, input_mask=input_mask, segment_ids=segment_ids, label_id=label_id)
+
+def convert_example_to_features(params):
+    max_seq_length = 512
+    example, tokenizer = params
+    tokens = tokenizer.tokenize(example.text_a)
+    if len(tokens) > max_seq_length - 2: # -2 for [CLS] and [SEP]
+        tokens = tokens[:(max_seq_length - 2)]
+    tokens = ["[CLS]"] + tokens + ["[SEP]"]
+    segment_ids = [0] * len(tokens)
+    input_ids = tokenizer.convert_tokens_to_ids(tokens)
+    input_mask = [1] * len(tokens)
+    padding = [0] * (max_seq_length - len(input_ids))
+    input_ids += padding
+    input_mask += padding
+    segment_ids += padding
+    label_id = example.label
+    return InputFeatures(input_ids=input_ids, input_mask=input_mask, segment_ids=segment_ids, label_id=label_id)
+
+def prepare_examples_to_process(example):
+    return (example, BertTokenizer.from_pretrained('bert-base-cased', do_lower_case=False))
 
 def convert_examples_to_features(bertDataConverter, examples):
-    process_count = cpu_count() - 1
+    process_count = cpu_count()
+    tokenizer = BertTokenizer.from_pretrained('bert-base-cased', do_lower_case=False)
+    examples_to_process = [(example, tokenizer) for example in examples]
     with Pool(process_count) as p:
+        # examples_to_process = list(tqdm(p.imap(prepare_examples_to_process, examples), total=len(examples)))
         train_features = \
-            list(tqdm(p.imap(bertDataConverter.convert_example_to_features, examples), total=len(examples)))
-    with open('./huggingfaces' + 'train_features.pkl', "wb") as f:
+            list(tqdm(p.imap(convert_example_to_features, examples_to_process), total=len(examples)))
+    with open('./huggingfaces/' + 'train_features.pkl', "wb") as f:
         pickle.dump(train_features, f)
 
 if __name__ == "__main__":

@@ -10,8 +10,10 @@ class BertDatapreparator():
         self.config = Config()
         self.labelMap = LABEL_MAP
 
-    def prepareDevset(self):
+    def prepareDevset(self, amount=None):
         dataSet = self.dataReader.read_data_set()
+        if amount is not None:
+            dataSet = dataSet[:amount]
         dev_df_bert = pd.DataFrame({
             'id': range(len(dataSet)),
             'label':dataSet['polarity'].replace(self.labelMap),
@@ -19,10 +21,11 @@ class BertDatapreparator():
             'text': dataSet['text'].replace(r'\n', ' ', regex=True)
         })
         dev_df_bert.to_csv(self.config.readValue('bert_dev_set'), sep='\t', index=False, header=False)
-        print(dev_df_bert.head())
 
-    def prepareTestset(self):
+    def prepareTestset(self, amount=None):
         testSet = self.dataReader.read_data_set()
+        if amount is not None:
+            testSet = testSet[:amount]
         test_df_bert = pd.DataFrame({
             'id': range(len(testSet)),
             'label':testSet['polarity'].replace(self.labelMap),
@@ -34,5 +37,5 @@ class BertDatapreparator():
 
 if __name__ == "__main__":
     preparator = BertDatapreparator()
-    preparator.prepareDevset()
-    preparator.prepareTestset()
+    preparator.prepareDevset(100)
+    preparator.prepareTestset(100)
