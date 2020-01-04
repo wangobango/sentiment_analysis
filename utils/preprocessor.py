@@ -342,6 +342,6 @@ if __name__ == "__main__":
     # TODO find other spelling correcter
     # TODO threads not joining afther being finished
     # TODO for some reason there are always the same amount of rows saved lol . fix it 
-    # prep.preprocessDataSet().correctSpelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
-    # prep.preprocessTestSet().correctSpelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessDataSet().correctSpelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
+    prep.preprocessTestSet().correctSpelling().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
     prep.joinSets()
