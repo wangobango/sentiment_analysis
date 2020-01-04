@@ -58,7 +58,7 @@ class Preprocessor:
         self.config = Config()
 
 
-    def processSingleDataSetValue(self, value, polarity, id,  output, objs, flags):
+    def processSingleDataSetValue(self, value, polarity, id,  output, objs, flags, csv):
         word_tokens = word_tokenize(value)
         if(flags['spelling'] == True):
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
@@ -70,17 +70,24 @@ class Preprocessor:
         if(flags['stem'] == True):
             word_tokens = [objs['stemmer'].stem(word) for word in word_tokens]
 
-
-        if(self.EMBEDDING):
-            counter = 0
+        if("-csv" in sys.argv):
+            results = pd.DataFrame(columns = ["id", "embedding", "polarity"])
             for word in word_tokens:
-                output.put([id, objs['mapper'].word2vec(word), 1 if polarity == 'positive' else 0])
-                counter += 1
-            # if(counter < self.SEQUENCE_LENGTH):
-            #     for _ in range(0, self.SEQUENCE_LENGTH - counter):
-            #         output.put([id, np.zeros((self.EMBEDDING_LENGTH,)), 1 if polarity == 'positive' else 0])
+                results = results.append({ 'id' : id, 'embedding': objs['mapper'].word2vec(word), 'polarity':1 if polarity == 'positive' else 0 }, ignore_index = True)
+            csv = csv.append(results, ignore_index = True)
+            return csv
         else:
-            output.put([id, " ".join(word_tokens), 1 if polarity == 'positive' else 0])
+            if(self.EMBEDDING):
+                counter = 0
+                for word in word_tokens:
+                    output.put([id, objs['mapper'].word2vec(word), 1 if polarity == 'positive' else 0])
+                    counter += 1
+                # if(counter < self.SEQUENCE_LENGTH):
+                #     for _ in range(0, self.SEQUENCE_LENGTH - counter):
+                #         output.put([id, np.zeros((self.EMBEDDING_LENGTH,)), 1 if polarity == 'positive' else 0])
+            else:
+                output.put([id, " ".join(word_tokens), 1 if polarity == 'positive' else 0])
+            return None
 
     def processChunk(self, list, output, procId):
         objs = {
@@ -90,13 +97,17 @@ class Preprocessor:
             'mapper' : Word2VecMapper(),
             'stop' : set(stopwords.words('english'))
         }
+        csv = pd.DataFrame(columns = ["id", "embedding", "polarity"])
         flags = copy.copy(self.flags)
         for idx,value in enumerate(list):
             if(idx % 10 == 0):
                 LOGGER.debug('{}, done {}/{}'.format(procId, idx+1, int(len(self.data_set)/self.numberOfProcesses)))
-            self.processSingleDataSetValue(value[0], value[1], value[2], output, objs, flags)
+            csv = self.processSingleDataSetValue(value[0], value[1], value[2], output, objs, flags, csv)
         LOGGER.debug("{}, finished processing".format(procId))
         # output.cancel_join_thread()
+        if("-csv" in sys.argv):
+            path = "processed_data_set" if self.set else "processed_test_set"
+            csv.to_csv(self.config.readValue(path).split(".")[0]+"_"+str(procId)+".csv", sep = ";", index=False)
 
     def buildWithFlags(self):
         output = mp.Queue()
@@ -112,33 +123,34 @@ class Preprocessor:
             p.start()
 
 
-        if(self.EMBEDDING):
-            numberOfItems = offset * self.numberOfProcesses * self.SEQUENCE_LENGTH
-        else:
-            numberOfItems = offset * self.numberOfProcesses
-        elapsed = 0
-        counter = 0
-        time.sleep(self.OVERHEAD_TIMEOUT)
-        start_time = time.time()
-        LOGGER.debug("Consumeing output")
-        # while counter < numberOfItems:
-        while True:
-            if(not output.empty()):
-                if(counter % 100 == 0):
-                    LOGGER.debug("Output size: {}".format(output.qsize()))
-                elapsed = 0
-                start_time = time.time()
-                counter += 1
-                value = output.get()
-                results = results.append({'id': value[0], 'embedding' : value[1], 'polarity': value[2] }, ignore_index = True)
+        if(not "-csv" in sys.argv):
+            if(self.EMBEDDING):
+                numberOfItems = offset * self.numberOfProcesses * self.SEQUENCE_LENGTH
             else:
-                current_time = time.time()
-                elapsed += current_time - start_time
-                start_time = current_time
-            
-            if(elapsed >= self.TIMEOUT):
-                LOGGER.debug("Timeout! Output size is {}, time elapsed: {}".format(output.qsize(), elapsed))
-                break
+                numberOfItems = offset * self.numberOfProcesses
+            elapsed = 0
+            counter = 0
+            time.sleep(self.OVERHEAD_TIMEOUT)
+            start_time = time.time()
+            LOGGER.debug("Consumeing output")
+            # while counter < numberOfItems:
+            while True:
+                if(not output.empty()):
+                    if(counter % 10 == 0):
+                        LOGGER.debug("Output size: {}".format(output.qsize()))
+                    elapsed = 0
+                    start_time = time.time()
+                    counter += 1
+                    value = output.get()
+                    results = results.append({'id': value[0], 'embedding' : value[1], 'polarity': value[2] }, ignore_index = True)
+                else:
+                    current_time = time.time()
+                    elapsed += current_time - start_time
+                    start_time = current_time
+                
+                if(elapsed >= self.TIMEOUT):
+                    LOGGER.debug("Timeout! Output size is {}, time elapsed: {}".format(output.qsize(), elapsed))
+                    break
 
 
         LOGGER.debug("Joining threads")
@@ -150,13 +162,14 @@ class Preprocessor:
         LOGGER.debug("Calculation finished")
         # results = pd.DataFrame([output.get() for p in processes])
         # results = pd.DataFrame(columns = ['embedding', 'polarity'])
-        while not output.empty():
-            value = output.get()
-            results = results.append({ 'embedding' : value[0], 'polarity': value[1] }, ignore_index = True)
-        if(self.set):
-            results.to_csv(self.config.readValue('processed_data_set'), sep = ";")
-        else:
-            results.to_csv(self.config.readValue('processed_test_set'), sep = ";")
+        if(not "-csv" in sys.argv):
+            while not output.empty():
+                value = output.get()
+                results = results.append({ 'embedding' : value[0], 'polarity': value[1] }, ignore_index = True)
+            if(self.set):
+                results.to_csv(self.config.readValue('processed_data_set'), sep = ";")
+            else:
+                results.to_csv(self.config.readValue('processed_test_set'), sep = ";")
 
     def setCorrectSPelling(self):
         self.flags['spelling'] = True
@@ -280,8 +293,21 @@ class Preprocessor:
         self.set = False
         return self
 
+    def joinSets(self):
+        path = self.config.readValue("processed")
+        temp = sorted(os.listdir(path))
+        frames = [pd.read_csv(path+"/"+frame, sep = ";") for frame in temp]
+        # data_set = pd.DataFrame(columns = ["id", "embedding", "polarity"])
+        # test_set = pd.DataFrame(columns = ["id", "embedding", "polarity"])
+        data_set = pd.concat(frames[:int(len(frames)/2)], axis = 0, sort = False, ignore_index = True)
+        test_set = pd.concat(frames[int(len(frames)/2)+1:], axis = 0, sort = False, ignore_index = True)   
+        # data_set = data_set.append(frames[:int(len(frames)/2)], sort = False, ignore_index = True)  
+        # test_set = test_set.append(frames[int(len(frames)/2)+1:], sort = False, ignore_index = True)
+        data_set.to_csv(self.config.readValue("processed_data_set"), sep = ";", index = False)       
+        test_set.to_csv(self.config.readValue("processed_test_set"), sep = ";", index = False)
+
+
 if __name__ == "__main__":
-    # TODO returns batched size with self.self.EMBEDDINGs, need to add padding
     """
         @prerequisites:
             directory 'processed' created in root directory of the project
@@ -297,6 +323,11 @@ if __name__ == "__main__":
             It's possible to only use static method to aggregate data like:
                 from utils.preprocessor import Preprocessor
                 Preprocessor.aggregateData()
+
+        Args:
+            -embedding to add embedding for each word
+            --log to display logs
+            -csv to force each process to write own csv
     """
     prep = Preprocessor()
     # Example:
@@ -313,4 +344,4 @@ if __name__ == "__main__":
     # TODO for some reason there are always the same amount of rows saved lol . fix it 
     prep.preprocessDataSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
     prep.preprocessTestSet().setLemmatizeFlag().setStopWordsFlag().buildWithFlags()
-    
+    prep.joinSets()
