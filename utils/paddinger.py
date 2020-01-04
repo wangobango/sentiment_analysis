@@ -167,19 +167,17 @@ class Paddinger:
 # if __name__ == "__main__":
 #     paddinger = Paddinger(batch_count = 7)
 #     batches = paddinger.get_batches()
-#     for b in batches:
-#         print(b.ceiling)
-#         print(b.sequences_s.shape)  #Here all sequences are in one dataframe
+    # for b in batches:
+    #     print(b.ceiling)
+    #     print(b.sequences_s)  #Here all sequences are in one dataframe
 # 
 #     or
 # 
-#       for b in batches:
-#       print(b.ceiling)
-#         for seq in b.sequences:
-#           print(seq.shape) #Here sequences are represented as array of Dataframes of particular sequences
+    # for b in batches:
+    #     print(b.ceiling)
+    #     for seq in b.sequences:
+    #         print(seq.shape) #Here sequences are represented as array of Dataframes of particular sequences
 
 
     
     
-
-        

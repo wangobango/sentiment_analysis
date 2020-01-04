@@ -298,7 +298,7 @@ if __name__ == "__main__":
                 from utils.preprocessor import Preprocessor
                 Preprocessor.aggregateData()
     """
-    prep = Preprocessor(numberOfProcesses=6, optional_length=24)
+    prep = Preprocessor(numberOfProcesses=6, optional_length=48*6*6)
     # Example:
     # data = pd.read_csv('./data_set/data_set.csv', nrows=10)
     # example = data['text'][1]
