@@ -15,6 +15,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from utils.config import Config
 from utils.process_results import Vocabulary
 from nltk.tokenize import RegexpTokenizer
+from console_progressbar import ProgressBar
 
 TOKENIZER = RegexpTokenizer(r'\w+')
 LOGGER = logging.getLogger('lstm_model')
@@ -164,9 +165,13 @@ if __name__ == "__main__":
     if("-train" in sys.argv):
         LOGGER.debug("Training in progress")
         LOGGER.debug("Training on set of size: {}".format(len(data['embedding'])))
+        pb = ProgressBar(total=int(len(data['embedding'])-1),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
+
         for e in range(epochs):
             LOGGER.debug("Epoch {}/{}".format(e, epochs))
+            counter = 0
             for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(generator):
+                pb.print_progress_bar(counter)
                 counter += 1
                     
                 subset_input_tensor = subset_input_tensor.to(device)
@@ -182,6 +187,7 @@ if __name__ == "__main__":
                 
                 nn.utils.clip_grad_norm_(model.parameters(), clip)
                 optimizer.step()
+
 
             LOGGER.debug("Loss function: {}".format(loss))
 
