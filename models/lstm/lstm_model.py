@@ -6,7 +6,10 @@ import sys
 import pickle
 import torch.nn as nn
 import torch
+import torch.nn.functional as functional
+import torch.optim as optim
 
+from torch.optim import lr_scheduler
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from utils.config import Config
@@ -20,8 +23,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class DataSampler(object):
     
     def __init__(self, input_tensor, input_lengths, labels_tensor, batch_size, sequence_lenght = 2665):
-        if "--log" in sys.argv:
-            logging.basicConfig(level=logging.DEBUG)
         self.input_tensor = input_tensor
         self.input_lengths = input_lengths
         self.labels_tensor = labels_tensor
@@ -97,16 +98,24 @@ class PolarityLSTM(nn.Module):
         
         return output
 
+def criterion(out, label):
+    return functional.binary_cross_entropy(out, label)
+
+
 if __name__ == "__main__":
+    if "--log" in sys.argv:
+            logging.basicConfig(level=logging.DEBUG)
     conf = Config()
     with open(conf.readValue("vocabulary"), "rb") as f:
         vocabulary = pickle.load(f)
 
+    LOGGER.debug("Reading data")
     data = pd.read_csv(conf.readValue("processed_data_set"), sep=";")
 
     vocab_to_int = vocabulary.getVocab2int()
     vectorized_seqs = []
 
+    LOGGER.debug("Vectorization and tokenization")
     for seq in data['embedding']:
         if isinstance(seq, str): 
             vectorized_seqs.append([vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)])
@@ -117,14 +126,68 @@ if __name__ == "__main__":
     # labels = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, data['polarity'])))
     labels = torch.LongTensor(data['polarity'])
 
+    LOGGER.debug("Adding padding")
     seq_tensor = Variable(torch.zeros((len(vectorized_seqs), seq_lengths.max()))).long()
     for idx, (seq, seqlen) in enumerate(zip(vectorized_seqs, seq_lengths)):
         seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
 
-    model = PolarityLSTM(300, vocabulary.getVocabLength(), 300, 1, 2)
-    generator = DataSampler(seq_tensor, seq_lengths, labels, 80)
+    LOGGER.debug("Model created")
 
-    for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(generator):
-        output = model.forward(subset_input_tensor, subset_input_lengths)
-        print(output)
-        break
+    """
+        Params start
+    """
+
+    epochs = 10
+    counter = 0
+    learning_rate = 0.1
+    weight_decay = 0.005
+    momentum = 0.9
+    clip = 5
+    embedding_dim = 300
+    vocab_size = vocabulary.getVocabLength()
+    hidden_dim = 300
+    output_size = 1
+    n_layers = 2
+    batch_size = 80
+
+    """
+        Params end
+    """
+    
+    model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+    generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
+    
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=weight_decay, momentum=momentum)
+    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, len(data['embedding']), eta_min=learning_rate)
+
+
+    if("-train" in sys.argv):
+        LOGGER.debug("Training in progress")
+        LOGGER.debug("Training on set of size: {}".format(len(data['embedding'])))
+        for e in range(epochs):
+            LOGGER.debug("Epoch {}/{}".format(e, epochs))
+            for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(generator):
+                counter += 1
+                    
+                subset_input_tensor = subset_input_tensor.to(device)
+                subset_input_lengths = subset_input_lengths.to(device)
+                subset_labels_tensor = subset_labels_tensor.to(device)
+        
+                output = model(subset_input_tensor, subset_input_lengths)
+            
+                loss = criterion(output, subset_labels_tensor.float())
+                
+                optimizer.zero_grad() 
+                loss.backward()
+                
+                nn.utils.clip_grad_norm_(model.parameters(), clip)
+                optimizer.step()
+
+            LOGGER.debug("Loss function: {}".format(loss))
+
+        LOGGER.debug("Training finished")
+
+        with open(conf.readValue("lstm_model_path"), "wb") as file:
+            pickle.dump(model, file)
+        LOGGER.debug("Model serialized")
+        
