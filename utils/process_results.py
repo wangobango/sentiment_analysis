@@ -14,6 +14,7 @@ from scipy import stats
 import collections
 from statsmodels.formula.api import ols
 from Levenshtein import jaro_winkler
+from collections import Counter
 
 PATH = "data_path"
 TOKENIZER = RegexpTokenizer(r'\w+')
@@ -26,6 +27,26 @@ FUNCTION_DEFINITIONS = {
     "polarity_positive_lenghts":  lambda data_set : [len(TOKENIZER.tokenize(x)) for x,y in zip(data_set["text"], data_set["polarity"]) if isinstance(x,str) and y == 'positive'],
     "polarity_negative_lenghts":  lambda data_set : [len(TOKENIZER.tokenize(x)) for x,y in zip(data_set["text"], data_set["polarity"]) if isinstance(x,str) and y == 'negative']
 }
+
+class Vocabulary:
+    def __init__(self, vocab, vocab2int):
+        self.vocabulary = vocab
+        self.vocab2int = vocab2int
+        self.config = Config()
+
+    def getVocab(self):
+        return self.vocabulary
+
+    def getVocab2int(self):
+        return self.vocab2int
+
+    def getVocabLength(self):
+        return len(self.vocabulary)
+
+    def serialize(self):
+        with open(self.config.readValue("vocabulary"), "wb") as f:
+            pickle.dump(self, f)
+
 
 class ResultsProcessor:
 
@@ -310,6 +331,17 @@ class ResultsProcessor:
         self.unique = self.parsed_dict[1]
         return self.parsed_dict[1]
 
+    def buildVocabulary(self):
+        path = self.config.readValue("data_set_path")
+        data_set = pd.read_csv(path)
+        vocabs = [vocab for seq in data_set["text"] if isinstance(seq, str) for vocab in TOKENIZER.tokenize(seq)]
+        vocab_count = Counter(vocabs)
+        vocab_count = vocab_count.most_common(len(vocab_count))
+        vocab_to_int = {word : index+2 for index, (word, count) in enumerate(vocab_count)}
+        vocab_to_int.update({'__PADDING__': 0}) 
+        vocab_to_int.update({'__UNKNOWN__': 1})
+        vocabulary = Vocabulary(vocab_count, vocab_to_int)
+        vocabulary.serialize()
 
 
 if __name__ == "__main__":
@@ -352,3 +384,6 @@ if __name__ == "__main__":
         # rp.getOccurances()
         rp.getStopWordsInDataSet()
         rp.getUniqueWordsInDataSet()
+
+    elif("-vocab") in sys.argv:
+        rp.buildVocabulary()
