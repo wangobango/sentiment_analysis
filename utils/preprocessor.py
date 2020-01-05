@@ -35,7 +35,7 @@ class Preprocessor:
         else:
             self.EMBEDDING = False
         self.EMBEDDING_LENGTH = 300
-        self.SEQUENCE_LENGTH = 100
+        self.SEQUENCE_LENGTH = 2665
         self.TIMEOUT = 60
         self.OVERHEAD_TIMEOUT = 60
         self.explorer = DataExplorer()
@@ -71,9 +71,23 @@ class Preprocessor:
             word_tokens = [objs['stemmer'].stem(word) for word in word_tokens]
 
         if("-csv" in sys.argv):
-            results = pd.DataFrame(columns = ["id", "embedding", "polarity"])
-            for word in word_tokens:
-                results = results.append({ 'id' : id, 'embedding': objs['mapper'].word2vec(word), 'polarity':1 if polarity == 'positive' else 0 }, ignore_index = True)
+            # results = pd.DataFrame(columns = ["id", "embedding", "polarity"])
+            temp = {}
+            counter = 0
+            if(self.EMBEDDING):
+                for word in word_tokens:
+                    # results = results.append({ 'id' : id, 'embedding': objs['mapper'].word2vec(word), 'polarity':1 if polarity == 'positive' else 0 }, ignore_index = True)
+                    temp[counter] = { 'id' : id, 'embedding': objs['mapper'].word2vec(word), 'polarity':1 if polarity == 'positive' else 0 } 
+            else:
+                csv = csv.append({ 'id' : id, 'embedding': ' '.join(word_tokens), 'polarity':1 if polarity == 'positive' else 0 }, ignore_index = True)     
+                return csv
+            if("-padding" in sys.argv):
+                if(counter < self.SEQUENCE_LENGTH):
+                    for _ in range(0, self.SEQUENCE_LENGTH - counter):
+                        # results = results.append({ 'id' : id, 'embedding': objs['mapper'].word2vec(word), 'polarity':1 if polarity == 'positive' else 0 }, ignore_index = True)
+                        temp[counter] = { 'id' : id, 'embedding': np.zeros((self.EMBEDDING_LENGTH,)), 'polarity':1 if polarity == 'positive' else 0 }
+                        counter += 1
+            results = pd.DataFrame.from_dict(temp, "index")
             csv = csv.append(results, ignore_index = True)
             return csv
         else:
@@ -82,9 +96,10 @@ class Preprocessor:
                 for word in word_tokens:
                     output.put([id, objs['mapper'].word2vec(word), 1 if polarity == 'positive' else 0])
                     counter += 1
-                # if(counter < self.SEQUENCE_LENGTH):
-                #     for _ in range(0, self.SEQUENCE_LENGTH - counter):
-                #         output.put([id, np.zeros((self.EMBEDDING_LENGTH,)), 1 if polarity == 'positive' else 0])
+                if("-padding" in sys.argv):
+                    if(counter < self.SEQUENCE_LENGTH):
+                        for _ in range(0, self.SEQUENCE_LENGTH - counter):
+                            output.put([id, np.zeros((self.EMBEDDING_LENGTH,)), 1 if polarity == 'positive' else 0])
             else:
                 output.put([id, " ".join(word_tokens), 1 if polarity == 'positive' else 0])
             return None
@@ -328,6 +343,7 @@ if __name__ == "__main__":
             -embedding to add embedding for each word
             --log to display logs
             -csv to force each process to write own csv
+            -padding to add static padding to each sequence
     """
     prep = Preprocessor()
     # Example:
