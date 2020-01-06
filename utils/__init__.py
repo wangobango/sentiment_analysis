@@ -14,3 +14,5 @@ try:
     nltk.data.find('wordnet')
 except LookupError as err:
     nltk.download('wordnet')
+
+# subprocess.run(['sudo python3 -m spacy download en_core_web_md'])

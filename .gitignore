@@ -5,7 +5,6 @@ data_set
 __pycache*
 aggregated/*.csv
 plots/*
-results.json
 absa_data/*
 .idea/*
 *.pickle
@@ -16,3 +15,4 @@ fasttext_tool/readme.txt
 fasttext_tool/model.bin
 */*.zip
 *.zip
+lstm.pickl
