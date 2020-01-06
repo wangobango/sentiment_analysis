@@ -166,7 +166,7 @@ if __name__ == "__main__":
         model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
         generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
         
-        optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=weight_decay, momentum=momentum)
+        optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay, momentum=momentum)
         scheduler = lr_scheduler.CosineAnnealingLR(optimizer, len(data['embedding']), eta_min=learning_rate)
         LOGGER.debug("Training in progress")
         LOGGER.debug("Training on set of size: {}".format(len(data['embedding'])))
