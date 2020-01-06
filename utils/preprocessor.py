@@ -290,6 +290,7 @@ class Preprocessor:
 
     def preprocessDataSet(self):
         data_set = pd.read_csv(self.config.readValue('data_set_path'))
+        data_set = data_set.sample(frac=1).reset_index(drop=True)
         if(self.optional_length != None):
             data_set = data_set[0:self.optional_length]
         self.data_set = data_set['text']
@@ -300,6 +301,7 @@ class Preprocessor:
 
     def preprocessTestSet(self):
         data_set = pd.read_csv(self.config.readValue('test_set_path'))
+        data_set = data_set.sample(frac=1).reset_index(drop=True)
         if(self.optional_length != None):
             data_set = data_set[0:self.optional_length]
         self.data_set = data_set['text']

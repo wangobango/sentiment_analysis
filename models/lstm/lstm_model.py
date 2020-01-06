@@ -16,6 +16,7 @@ from utils.config import Config
 from utils.process_results import Vocabulary
 from nltk.tokenize import RegexpTokenizer
 from console_progressbar import ProgressBar
+from utils.data_evaluator import Evaluator
 
 TOKENIZER = RegexpTokenizer(r'\w+')
 LOGGER = logging.getLogger('lstm_model')
@@ -111,7 +112,10 @@ if __name__ == "__main__":
         vocabulary = pickle.load(f)
 
     LOGGER.debug("Reading data")
-    data = pd.read_csv(conf.readValue("processed_data_set"), sep=";")
+    if("-train" in sys.argv):
+        data = pd.read_csv(conf.readValue("processed_data_set"), sep=";")
+    elif("-test" in sys.argv):
+        data = pd.read_csv(conf.readValue("processed_test_set"), sep=";")
 
     vocab_to_int = vocabulary.getVocab2int()
     vectorized_seqs = []
@@ -140,7 +144,7 @@ if __name__ == "__main__":
 
     epochs = 10
     counter = 0
-    learning_rate = 0.1
+    learning_rate = 0.0001
     weight_decay = 0.005
     momentum = 0.9
     clip = 5
@@ -155,21 +159,21 @@ if __name__ == "__main__":
         Params end
     """
     
-    model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
-    generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
-    
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=weight_decay, momentum=momentum)
-    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, len(data['embedding']), eta_min=learning_rate)
-
-
     if("-train" in sys.argv):
+        model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
+        
+        optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=weight_decay, momentum=momentum)
+        scheduler = lr_scheduler.CosineAnnealingLR(optimizer, len(data['embedding']), eta_min=learning_rate)
         LOGGER.debug("Training in progress")
         LOGGER.debug("Training on set of size: {}".format(len(data['embedding'])))
-        pb = ProgressBar(total=int(len(data['embedding'])-1),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
-
+        pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
+        model.train()
         for e in range(epochs):
             LOGGER.debug("Epoch {}/{}".format(e, epochs))
             counter = 0
+            correct = []
+            total = []
             for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(generator):
                 pb.print_progress_bar(counter)
                 counter += 1
@@ -188,8 +192,21 @@ if __name__ == "__main__":
                 nn.utils.clip_grad_norm_(model.parameters(), clip)
                 optimizer.step()
 
+                # Calculate accuracy
 
-            LOGGER.debug("Loss function: {}".format(loss))
+                binary_output = (output >= 0.5).short()
+                right_or_not = torch.eq(binary_output, subset_labels_tensor)
+                correct.append(torch.sum(right_or_not).float().item())
+                total.append(right_or_not.shape[0])
+            
+            scheduler.step(e)
+            # LOGGER.debug(binary_output)
+            # LOGGER.debug(subset_labels_tensor)
+            accuracy = sum(correct) / sum(total)
+            correct.clear()
+            total.clear()
+            LOGGER.debug("Loss function: {:2f}, accuracy: {:3f}".format(loss, accuracy))
+            LOGGER.debug("Steps taken: {}".format(counter))
 
         LOGGER.debug("Training finished")
 
@@ -197,3 +214,33 @@ if __name__ == "__main__":
             pickle.dump(model, file)
         LOGGER.debug("Model serialized")
         
+    if("-test" in sys.argv):
+        with open(conf.readValue("lstm_model_path"), "rb") as file:
+            model = pickle.load(file)
+
+        pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
+
+        test_generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
+        model.eval()
+        evaluator = Evaluator()
+
+        outputs = []
+        labels = []
+        couter = 0
+
+        LOGGER.debug("Evaluation in progress")
+
+        for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(test_generator):
+            pb.print_progress_bar(counter)
+
+            subset_input_tensor = subset_input_tensor.to(device)
+            subset_input_lengths = subset_input_lengths.to(device)
+            subset_labels_tensor = subset_labels_tensor.to(device)
+            output = model(subset_input_tensor, subset_input_lengths)
+
+            binary_output = (output >= 0.5).short()
+            outputs.extend(binary_output.detach().numpy())
+            labels.extend(subset_labels_tensor.detach().numpy())    
+            counter += 1
+        
+        evaluator.evaluate(labels, outputs)
