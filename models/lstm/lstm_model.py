@@ -118,6 +118,8 @@ if __name__ == "__main__":
     elif("-test" in sys.argv):
         data = pd.read_csv(conf.readValue("processed_test_set"), sep=";")
 
+    data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+
     vocab_to_int = vocabulary.getVocab2int()
     vectorized_seqs = []
 
@@ -145,7 +147,7 @@ if __name__ == "__main__":
         Params start
     """
 
-    epochs = 10
+    epochs = 6
     counter = 0
     learning_rate = 0.0001
     weight_decay = 0.005
