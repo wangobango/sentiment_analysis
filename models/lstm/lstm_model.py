@@ -17,6 +17,7 @@ from utils.process_results import Vocabulary
 from nltk.tokenize import RegexpTokenizer
 from console_progressbar import ProgressBar
 from utils.data_evaluator import Evaluator
+from utils.preprocessor import Preprocessor
 
 TOKENIZER = RegexpTokenizer(r'\w+')
 LOGGER = logging.getLogger('lstm_model')
@@ -120,23 +121,25 @@ if __name__ == "__main__":
     vocab_to_int = vocabulary.getVocab2int()
     vectorized_seqs = []
 
-    LOGGER.debug("Vectorization and tokenization")
-    for seq in data['embedding']:
-        if isinstance(seq, str): 
-            vectorized_seqs.append([vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)])
-        else:
-            vectorized_seqs.append([])
+    if("-train" in sys.argv or "-test" in sys.argv):
 
-    seq_lengths = torch.LongTensor(list(map(len, vectorized_seqs)))
-    # labels = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, data['polarity'])))
-    labels = torch.LongTensor(data['polarity'])
+        LOGGER.debug("Vectorization and tokenization")
+        for seq in data['embedding']:
+            if isinstance(seq, str): 
+                vectorized_seqs.append([vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)])
+            else:
+                vectorized_seqs.append([])
 
-    LOGGER.debug("Adding padding")
-    seq_tensor = Variable(torch.zeros((len(vectorized_seqs), seq_lengths.max()))).long()
-    for idx, (seq, seqlen) in enumerate(zip(vectorized_seqs, seq_lengths)):
-        seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
+        seq_lengths = torch.LongTensor(list(map(len, vectorized_seqs)))
+        # labels = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, data['polarity'])))
+        labels = torch.LongTensor(data['polarity'])
 
-    LOGGER.debug("Model created")
+        LOGGER.debug("Adding padding")
+        seq_tensor = Variable(torch.zeros((len(vectorized_seqs), seq_lengths.max()))).long()
+        for idx, (seq, seqlen) in enumerate(zip(vectorized_seqs, seq_lengths)):
+            seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
+
+        LOGGER.debug("Model created")
 
     """
         Params start
@@ -244,3 +247,37 @@ if __name__ == "__main__":
             counter += 1
         
         evaluator.evaluate(labels, outputs)
+
+    
+    if("-predict" in sys.argv):
+        with open(conf.readValue("lstm_model_path"), "rb") as file:
+            model = pickle.load(file)
+        model.eval()
+        prep = Preprocessor()
+
+        index = sys.argv.index("-predict")
+
+        text = sys.argv[index+1]
+        text = prep.setText(text).correctSpelling().setLemmatizeFlag().setStopWordsFlag().build()
+        text = [text]
+
+        vectorized_seqs = []
+        for seq in text: 
+            vectorized_seqs.append([vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)])
+        
+        seq_lengths = torch.LongTensor(list(map(len, vectorized_seqs)))
+
+        seq_tensor = Variable(torch.zeros((len(vectorized_seqs), seq_lengths.max()))).long()
+        for idx, (seq, seqlen) in enumerate(zip(vectorized_seqs, seq_lengths)):
+            seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
+
+        # print(seq_tensor)
+        # print(seq_lengths)
+
+        seq_tensor = seq_tensor.to(device)
+        seq_lengths = seq_lengths.to(device)
+        output = model(seq_tensor, seq_lengths)
+
+        value = output.item()
+        label = 'positive' if value >= 0.5 else 'negative'
+        print('Polarity of given sentence is ' + label + ", and exquals to: {}".format(value))
