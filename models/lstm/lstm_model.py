@@ -30,7 +30,7 @@ class DataSampler(object):
         self.input_lengths = input_lengths
         self.labels_tensor = labels_tensor
         self.batch_size = batch_size
-        self.sequence_lenght = 2665
+        self.sequence_length = 2665
 
         self.sampler = splr.BatchSampler(splr.RandomSampler(self.labels_tensor), self.batch_size, False)
         self.sampler_iter = iter(self.sampler)
