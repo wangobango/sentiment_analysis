@@ -115,11 +115,12 @@ if __name__ == "__main__":
     LOGGER.debug("Reading data")
     if("-train" in sys.argv):
         data = pd.read_csv(conf.readValue("processed_data_set"), sep=";")
-        data = data[:100000]
+        data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+
     elif("-test" in sys.argv):
         data = pd.read_csv(conf.readValue("processed_test_set"), sep=";")
-
-    data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+        data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+        data = data[:1000]
 
     vocab_to_int = vocabulary.getVocab2int()
     vectorized_seqs = []
@@ -159,7 +160,7 @@ if __name__ == "__main__":
     hidden_dim = 300
     output_size = 1
     n_layers = 2
-    batch_size = 80
+    batch_size = 40
 
     """
         Params end
@@ -167,6 +168,8 @@ if __name__ == "__main__":
     
     if("-train" in sys.argv):
         model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        if("-gpu" in sys.argv):
+            model.cuda(device)
         generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
         
         optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
@@ -224,6 +227,9 @@ if __name__ == "__main__":
         with open(conf.readValue("lstm_model_path"), "rb") as file:
             model = pickle.load(file)
 
+        if("-gpu" in sys.argv):
+            model.cuda(device)
+
         pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
 
         test_generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
@@ -242,11 +248,14 @@ if __name__ == "__main__":
             subset_input_tensor = subset_input_tensor.to(device)
             subset_input_lengths = subset_input_lengths.to(device)
             subset_labels_tensor = subset_labels_tensor.to(device)
+
+            if("-gpu" in sys.argv):
+                model.lstm.flatten_parameters()
             output = model(subset_input_tensor, subset_input_lengths)
 
             binary_output = (output >= 0.5).short()
-            outputs.extend(binary_output.detach().numpy())
-            labels.extend(subset_labels_tensor.detach().numpy())    
+            outputs.extend(binary_output.cpu().detach().numpy())
+            labels.extend(subset_labels_tensor.cpu().detach().numpy())    
             counter += 1
         
         evaluator.evaluate(labels, outputs)
@@ -256,6 +265,8 @@ if __name__ == "__main__":
         with open(conf.readValue("lstm_model_path"), "rb") as file:
             model = pickle.load(file)
         model.eval()
+        if("-gpu" in sys.argv):
+            model.cuda(device)
         prep = Preprocessor()
 
         index = sys.argv.index("-predict")
@@ -279,8 +290,19 @@ if __name__ == "__main__":
 
         seq_tensor = seq_tensor.to(device)
         seq_lengths = seq_lengths.to(device)
+        if("-gpu" in sys.argv):
+                model.lstm.flatten_parameters()
         output = model(seq_tensor, seq_lengths)
 
         value = output.item()
         label = 'positive' if value >= 0.5 else 'negative'
         print('Polarity of given sentence is ' + label + ", and exquals to: {}".format(value))
+
+"""
+    Usage:
+        -train to train lstm model
+        -test to evaluate model
+        -predict to predict sentence given as 2nd argument
+        --log to print logs
+        -gpu to enable gpu support (if available)
+"""
