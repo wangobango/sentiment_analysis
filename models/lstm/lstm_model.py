@@ -173,6 +173,7 @@ if __name__ == "__main__":
         
         optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         scheduler = lr_scheduler.CosineAnnealingLR(optimizer, len(data['embedding']), eta_min=learning_rate)
+
         LOGGER.debug("Training in progress")
         LOGGER.debug("Training on set of size: {}".format(len(data['embedding'])))
         pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
@@ -218,13 +219,17 @@ if __name__ == "__main__":
 
         LOGGER.debug("Training finished")
 
-        with open(conf.readValue("lstm_model_path"), "wb") as file:
-            pickle.dump(model, file)
+        # with open(conf.readValue("lstm_model_path"), "wb") as file:
+        #     pickle.dump(model, file)
+        torch.save(model.state_dict(), conf.readValue("lstm_model_path"))
         LOGGER.debug("Model serialized")
         
     if("-test" in sys.argv):
-        with open(conf.readValue("lstm_model_path"), "rb") as file:
-            model = pickle.load(file)
+        # with open(conf.readValue("lstm_model_path"), "rb") as file:
+        #     model = pickle.load(file)
+        model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
+
 
         if("-gpu" in sys.argv):
             model.cuda(device)
@@ -261,8 +266,11 @@ if __name__ == "__main__":
 
     
     if("-predict" in sys.argv):
-        with open(conf.readValue("lstm_model_path"), "rb") as file:
-            model = pickle.load(file)
+        # with open(conf.readValue("lstm_model_path"), "rb") as file:
+        #     model = pickle.load(file)
+        model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
+
         model.eval()
         if("-gpu" in sys.argv):
             model.cuda(device)
@@ -304,4 +312,8 @@ if __name__ == "__main__":
         -predict to predict sentence given as 2nd argument
         --log to print logs
         -gpu to enable gpu support (if available)
+"""
+
+"""
+    Jeśli długość była dobrym predyktorem dla baseline'a a lstm sobie nie radził to może dodąć długość do warstwy w pełni połączonej?
 """
