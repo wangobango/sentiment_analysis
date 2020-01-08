@@ -310,18 +310,18 @@ if __name__ == "__main__":
         # print(seq_tensor)
         # print(seq_lengths)
 
-        seq_tensor = seq_tensor.to(device)
-        seq_lengths = seq_lengths.to(device)
-        if("-gpu" in sys.argv):
-                model.lstm.flatten_parameters()
-        try:
-            output = model(subset_input_tensor, subset_input_lengths)
-        except RuntimeError as ex:
-            print(counter)
-            print(ex)
-            print(subset_input_tensor)
-            print(subset_input_lengths)
-            continue
+            seq_tensor = seq_tensor.to(device)
+            seq_lengths = seq_lengths.to(device)
+            if("-gpu" in sys.argv):
+                    model.lstm.flatten_parameters()
+            try:
+                output = model(seq_tensor, seq_lengths)
+            except RuntimeError as ex:
+                print(counter)
+                print(ex)
+                print(seq_tensor)
+                print(seq_lengths)
+                continue
 
         value = output.item()
         label = 'positive' if value >= 0.5 else 'negative'
