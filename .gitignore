@@ -16,3 +16,4 @@ fasttext_tool/model.bin
 */*.zip
 *.zip
 lstm.pickl
+old_models/*

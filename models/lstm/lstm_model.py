@@ -190,8 +190,15 @@ if __name__ == "__main__":
                 subset_input_lengths = subset_input_lengths.to(device)
                 subset_labels_tensor = subset_labels_tensor.to(device)
         
-                output = model(subset_input_tensor, subset_input_lengths)
-            
+                try:
+                    output = model(subset_input_tensor, subset_input_lengths)
+                except RuntimeError as ex:
+                    print(counter)
+                    print(ex)
+                    print(subset_input_tensor)
+                    print(subset_input_lengths)
+                    continue
+                    
                 loss = criterion(output, subset_labels_tensor.float())
                 
                 optimizer.zero_grad() 
@@ -250,8 +257,16 @@ if __name__ == "__main__":
 
             if("-gpu" in sys.argv):
                 model.lstm.flatten_parameters()
-            output = model(subset_input_tensor, subset_input_lengths)
 
+            try:
+                output = model(subset_input_tensor, subset_input_lengths)
+            except RuntimeError as ex:
+                print(counter)
+                print(ex)
+                print(subset_input_tensor)
+                print(subset_input_lengths)
+                continue
+            
             binary_output = (output >= 0.5).short()
             outputs.extend(binary_output.cpu().detach().numpy())
             labels.extend(subset_labels_tensor.cpu().detach().numpy())    
@@ -291,7 +306,14 @@ if __name__ == "__main__":
         seq_lengths = seq_lengths.to(device)
         if("-gpu" in sys.argv):
                 model.lstm.flatten_parameters()
-        output = model(seq_tensor, seq_lengths)
+        try:
+            output = model(subset_input_tensor, subset_input_lengths)
+        except RuntimeError as ex:
+            print(counter)
+            print(ex)
+            print(subset_input_tensor)
+            print(subset_input_lengths)
+            continue
 
         value = output.item()
         label = 'positive' if value >= 0.5 else 'negative'
