@@ -115,6 +115,7 @@ if __name__ == "__main__":
     LOGGER.debug("Reading data")
     if("-train" in sys.argv):
         data = pd.read_csv(conf.readValue("processed_data_set"), sep=";")
+        data = data[:10000]
         data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
 
     elif("-test" in sys.argv):
