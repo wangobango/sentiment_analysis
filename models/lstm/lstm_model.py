@@ -175,7 +175,7 @@ if __name__ == "__main__":
         
         optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         scheduler = lr_scheduler.CosineAnnealingLR(optimizer, len(data['embedding']), eta_min=learning_rate)
-
+        LOGGER.debug("embedding layer " + len(data['embedding']))
         LOGGER.debug("Training in progress")
         LOGGER.debug("Training on set of size: {}".format(len(data['embedding'])))
         pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
