@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as functional
 import torch.optim as optim
+import matplotlib.pyplot as plt
 
 from torch.optim import lr_scheduler
 from torch.autograd import Variable
@@ -115,7 +116,7 @@ if __name__ == "__main__":
     LOGGER.debug("Reading data")
     if("-train" in sys.argv):
         data = pd.read_csv(conf.readValue("processed_data_set"), sep=";")
-        data = data[:10000]
+        data = data[:50000]
         
         data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
 
@@ -150,7 +151,7 @@ if __name__ == "__main__":
         Params start
     """
 
-    epochs = 6
+    epochs = 30
     counter = 0
     learning_rate = 0.0001
     weight_decay = 0.005
@@ -166,7 +167,7 @@ if __name__ == "__main__":
     """
         Params end
     """
-    
+    accuracy_array = []
     if("-train" in sys.argv):
         model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
         if("-gpu" in sys.argv):
@@ -220,12 +221,24 @@ if __name__ == "__main__":
             # LOGGER.debug(binary_output)
             # LOGGER.debug(subset_labels_tensor)
             accuracy = sum(correct) / sum(total)
+            accuracy_array.append(accuracy)
             correct.clear()
             total.clear()
             LOGGER.debug("Loss function: {:2f}, accuracy: {:3f}".format(loss, accuracy))
             LOGGER.debug("Steps taken: {}".format(counter))
 
         LOGGER.debug("Training finished")
+        f = open('./accuracy_train_epochs.txt', 'w')
+        for i, a in enumerate(accuracy_array):
+            f.write(str(i) + " " + str(a) + "\n" )
+        f.close()
+
+        data = {'Accuracy' : accuracy_array, 'Epoch' : range(1,epochs +1)}
+        df = df = pd.DataFrame(data,columns=['Epoch','Accuracy'])
+        df.plot(x ='Epoch', y='Accuracy', kind = 'line')
+        plt.savefig('./accuracy_train_epochs.png')
+
+
 
         # with open(conf.readValue("lstm_model_path"), "wb") as file:
         #     pickle.dump(model, file)
