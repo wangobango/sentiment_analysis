@@ -246,14 +246,14 @@ class Preprocessor:
     def removeStopWordsDatasetBased(self):
         stopWords = self.resultsProcessor.getStopWordsInDataSet()
         word_tokens = word_tokenize(self.text)
-        stopped = [word for word in word_tokens if word in stopWords]
+        stopped = [word for word in word_tokens if word.lower() in stopWords]
         filtered = [w for w in word_tokens if not w in stopWords]
         self.text = " ".join(filtered)
         return self
 
     def removeStopWordsEnglishCorpusBased(self):
         word_tokens = word_tokenize(self.text)
-        filtered = [w for w in word_tokens if not w in self.englishStopWords]
+        filtered = [w for w in word_tokens if not w.lower() in self.englishStopWords]
         self.text = " ".join(filtered)
         return self
 
@@ -350,10 +350,10 @@ if __name__ == "__main__":
     prep = Preprocessor(numberOfProcesses=6, optional_length=24)
     # Example:
     # data = pd.read_csv('./data_set/data_set.csv', nrows=10)
-    # example = data['text'][1]
+    # example = 'I thought about rating this movie a 2 but I know that it will haunt me for the rest of my life. I seen this movie and every time I look at it, it hurt my freakin eyes. The movie takes place mostly in a psychiatric hospital and poor helpless teens are being terrorized by Freddy. But does it really matter? Because you dont care for the characters in the first place. Good let them die. The sooner they die, the sooner this movie is over. The plot had no freakin point. And the actors might as well been on drugz thru out the movie. But I must admit, the director must have some talent for making this movie as bad as it was. Almost as bad as The Blair Witch Project Do you got something to say about what I wrote? And I know you do. Please write to me at'
     # print(example)
     # print("---------***----------")
-    # text = prep.setText(example).removeStopWordsDatasetBased().build()
+    # text = prep.setText(example).lemmatize().correctSpelling().removeStopWordsEnglishCorpusBased().build()
     # print(text)
 
 
