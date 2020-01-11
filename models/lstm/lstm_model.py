@@ -28,7 +28,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 """
     Params start
 """
-set_count = 100000
+set_count = 1000
 epochs = 40
 counter = 0
 learning_rate = 0.0001
@@ -122,15 +122,16 @@ class PolarityLSTM(nn.Module):
 def criterion(out, label):
     return functional.binary_cross_entropy(out, label)
 
-def test(test_data, labels, model):
+def test(test_data, labels):
     # with open(conf.readValue("lstm_model_path"), "rb") as file:
     #     model = pickle.load(file)
-    # model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
-    # model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
+    model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+    model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
 
 
-    # if("-gpu" in sys.argv):
-    #     model.cuda(device)
+    if("-gpu" in sys.argv):
+        model.cuda(device)
+
 
     pb = ProgressBar(total=int(len(test_data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
 
@@ -284,7 +285,10 @@ if __name__ == "__main__":
             LOGGER.debug("Loss function: {:2f}, accuracy: {:3f}".format(loss, accuracy))
             LOGGER.debug("Steps taken: {}".format(counter))
 
-            metrics = test(test_data, labels, model)
+            torch.save(model.state_dict(), conf.readValue("lstm_model_path"))
+            metrics = test(test_data, labels)
+
+            # model.train()
 
             fscore_array.append(metrics['f-score'])
             precision_array.append(metrics['precision'])
