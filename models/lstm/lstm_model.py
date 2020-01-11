@@ -28,7 +28,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 """
     Params start
 """
-set_count = 1000
+set_count = 100000
 epochs = 40
 counter = 0
 learning_rate = 0.0001
@@ -226,6 +226,7 @@ if __name__ == "__main__":
     precision_array = []
     recall_array = []
     test_accuracy_array = []
+    loss_array = []
     if("-train" in sys.argv):
         model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
         if("-gpu" in sys.argv):
@@ -280,6 +281,7 @@ if __name__ == "__main__":
             # LOGGER.debug(subset_labels_tensor)
             accuracy = sum(correct) / sum(total)
             accuracy_array.append(accuracy)
+            loss_array.append(loss)
             correct.clear()
             total.clear()
             LOGGER.debug("Loss function: {:2f}, accuracy: {:3f}".format(loss, accuracy))
@@ -301,7 +303,7 @@ if __name__ == "__main__":
         #     f.write(str(i) + " " + str(a) + "\n" )
         # f.close()
 
-        d = {'Epoch' : range(1,epochs +1), 'Accuracy' : accuracy_array, 'f-score' : fscore_array, 
+        d = {'Epoch' : range(1,epochs +1), 'Accuracy' : accuracy_array, 'f-score' : fscore_array, 'Loss' : loss_array,
                 'Precision' : precision_array, 'Recall': recall_array, 'Test set accuracy': test_accuracy_array}
         df = pd.DataFrame(d,columns=['Epoch','Accuracy', 'f-score', 'Precision', 'Recall', 'Test set accuracy'])
         df.to_csv('./metrics_epochs.csv', sep = ';')
@@ -311,6 +313,7 @@ if __name__ == "__main__":
         df.plot(x ='Epoch', y='Precision', kind = 'line', color='blue', ax=ax)
         df.plot(x ='Epoch', y='Recall', kind = 'line', color='yellow', ax=ax)
         df.plot(x ='Epoch', y='Test set accuracy', kind = 'line', color='purple', ax=ax)
+        df.plot(x ='Epoch', y='Loss', kind = 'line', color='pink', ax=ax)
         plt.savefig('./accuracy_train_epochs.png')
 
 
