@@ -9,6 +9,7 @@ import torch
 import torch.nn.functional as functional
 import torch.optim as optim
 import matplotlib.pyplot as plt
+import time
 
 from torch.optim import lr_scheduler
 from torch.autograd import Variable
@@ -23,6 +24,22 @@ from utils.preprocessor import Preprocessor
 TOKENIZER = RegexpTokenizer(r'\w+')
 LOGGER = logging.getLogger('lstm_model')
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+"""
+    Params start
+"""
+set_count = 100000
+epochs = 40
+counter = 0
+learning_rate = 0.0001
+weight_decay = 0.005
+momentum = 0.9
+clip = 5
+embedding_dim = 300
+hidden_dim = 300
+output_size = 1
+n_layers = 2
+batch_size = 40
 
 class DataSampler(object):
     
@@ -105,6 +122,55 @@ class PolarityLSTM(nn.Module):
 def criterion(out, label):
     return functional.binary_cross_entropy(out, label)
 
+def test(test_data, labels, model):
+    # with open(conf.readValue("lstm_model_path"), "rb") as file:
+    #     model = pickle.load(file)
+    # model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+    # model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
+
+
+    # if("-gpu" in sys.argv):
+    #     model.cuda(device)
+
+    pb = ProgressBar(total=int(len(test_data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
+
+    test_generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
+    model.eval()
+    evaluator = Evaluator()
+
+    outputs = []
+    labels = []
+    counter = 0
+
+    LOGGER.debug("Evaluation in progress")
+
+    for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(test_generator):
+        pb.print_progress_bar(counter)
+
+        subset_input_tensor = subset_input_tensor.to(device)
+        subset_input_lengths = subset_input_lengths.to(device)
+        subset_labels_tensor = subset_labels_tensor.to(device)
+
+        if("-gpu" in sys.argv):
+            model.lstm.flatten_parameters()
+
+        try:
+            output = model(subset_input_tensor, subset_input_lengths)
+        except RuntimeError as ex:
+            print(counter)
+            print(ex)
+            print(subset_input_tensor)
+            print(subset_input_lengths)
+            continue
+        
+        binary_output = (output >= 0.5).short()
+        outputs.extend(binary_output.cpu().detach().numpy())
+        labels.extend(subset_labels_tensor.cpu().detach().numpy())    
+        counter += 1
+    
+    return evaluator.evaluate(labels, outputs)
+
+
 
 if __name__ == "__main__":
     if "--log" in sys.argv:
@@ -116,58 +182,49 @@ if __name__ == "__main__":
     LOGGER.debug("Reading data")
     if("-train" in sys.argv):
         data = pd.read_csv(conf.readValue("processed_data_set"), sep=";")
-        data = data[:50000]
+        data = data[:set_count]
         
         data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
 
-    elif("-test" in sys.argv):
-        data = pd.read_csv(conf.readValue("processed_test_set"), sep=";")
-        data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+    # elif("-test" in sys.argv):
+    test_data = pd.read_csv(conf.readValue("processed_test_set"), sep=";")
+    test_data = test_data[:int(0.3*set_count)]
+    test_data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
 
+    vocab_size = vocabulary.getVocabLength()
     vocab_to_int = vocabulary.getVocab2int()
     vectorized_seqs = []
 
-    if("-train" in sys.argv or "-test" in sys.argv):
+    # if("-train" in sys.argv or "-test" in sys.argv):
 
-        LOGGER.debug("Vectorization and tokenization")
-        for seq in data['embedding']:
-            if isinstance(seq, str): 
-                vectorized_seqs.append([vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)])
-            else:
-                vectorized_seqs.append([])
+    LOGGER.debug("Vectorization and tokenization")
+    for seq in data['embedding']:
+        if isinstance(seq, str): 
+            vectorized_seqs.append([vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)])
+        else:
+            vectorized_seqs.append([])
 
-        seq_lengths = torch.LongTensor(list(map(len, vectorized_seqs)))
-        # labels = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, data['polarity'])))
-        labels = torch.LongTensor(data['polarity'])
+    seq_lengths = torch.LongTensor(list(map(len, vectorized_seqs)))
+    # labels = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, data['polarity'])))
+    labels = torch.LongTensor(data['polarity'])
 
-        LOGGER.debug("Adding padding")
-        seq_tensor = Variable(torch.zeros((len(vectorized_seqs), seq_lengths.max()))).long()
-        for idx, (seq, seqlen) in enumerate(zip(vectorized_seqs, seq_lengths)):
-            seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
+    LOGGER.debug("Adding padding")
+    seq_tensor = Variable(torch.zeros((len(vectorized_seqs), seq_lengths.max()))).long()
+    for idx, (seq, seqlen) in enumerate(zip(vectorized_seqs, seq_lengths)):
+        seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
 
-        LOGGER.debug("Model created")
+    LOGGER.debug("Model created")
 
-    """
-        Params start
-    """
 
-    epochs = 30
-    counter = 0
-    learning_rate = 0.0001
-    weight_decay = 0.005
-    momentum = 0.9
-    clip = 5
-    embedding_dim = 300
-    vocab_size = vocabulary.getVocabLength()
-    hidden_dim = 300
-    output_size = 1
-    n_layers = 2
-    batch_size = 40
 
     """
         Params end
     """
     accuracy_array = []
+    fscore_array = []
+    precision_array = []
+    recall_array = []
+    test_accuracy_array = []
     if("-train" in sys.argv):
         model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
         if("-gpu" in sys.argv):
@@ -227,71 +284,87 @@ if __name__ == "__main__":
             LOGGER.debug("Loss function: {:2f}, accuracy: {:3f}".format(loss, accuracy))
             LOGGER.debug("Steps taken: {}".format(counter))
 
-        LOGGER.debug("Training finished")
-        f = open('./accuracy_train_epochs.txt', 'w')
-        for i, a in enumerate(accuracy_array):
-            f.write(str(i) + " " + str(a) + "\n" )
-        f.close()
+            metrics = test(test_data, labels, model)
 
-        data = {'Accuracy' : accuracy_array, 'Epoch' : range(1,epochs +1)}
-        df = df = pd.DataFrame(data,columns=['Epoch','Accuracy'])
-        df.plot(x ='Epoch', y='Accuracy', kind = 'line')
+            fscore_array.append(metrics['f-score'])
+            precision_array.append(metrics['precision'])
+            recall_array.append(metrics['recall'])
+            test_accuracy_array.append(metrics['accuracy'])
+
+        LOGGER.debug("Training finished")
+        # f = open('./accuracy_train_epochs.txt', 'w')
+        # for i, a in enumerate(accuracy_array):
+        #     f.write(str(i) + " " + str(a) + "\n" )
+        # f.close()
+
+        d = {'Epoch' : range(1,epochs +1), 'Accuracy' : accuracy_array, 'f-score' : fscore_array, 
+                'Precision' : precision_array, 'Recall': recall_array, 'Test set accuracy': test_accuracy_array}
+        df = pd.DataFrame(d,columns=['Epoch','Accuracy', 'f-score', 'Precision', 'Recall', 'Test set accuracy'])
+        df.to_csv('./metrics_epochs.csv', sep = ';')
+        ax = plt.gca()
+        df.plot(x ='Epoch', y='Accuracy', kind = 'line', color='red', ax=ax)
+        df.plot(x ='Epoch', y='f-score', kind = 'line', color='green', ax=ax)
+        df.plot(x ='Epoch', y='Precision', kind = 'line', color='blue', ax=ax)
+        df.plot(x ='Epoch', y='Recall', kind = 'line', color='yellow', ax=ax)
+        df.plot(x ='Epoch', y='Test set accuracy', kind = 'line', color='purple', ax=ax)
         plt.savefig('./accuracy_train_epochs.png')
 
 
 
         # with open(conf.readValue("lstm_model_path"), "wb") as file:
         #     pickle.dump(model, file)
+        # ts = time.time()
         torch.save(model.state_dict(), conf.readValue("lstm_model_path"))
         LOGGER.debug("Model serialized")
         
-    if("-test" in sys.argv):
+    # if("-test" in sys.argv):
+    #     test()
         # with open(conf.readValue("lstm_model_path"), "rb") as file:
         #     model = pickle.load(file)
-        model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
-        model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
+        # model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        # model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
 
 
-        if("-gpu" in sys.argv):
-            model.cuda(device)
+        # if("-gpu" in sys.argv):
+        #     model.cuda(device)
 
-        pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
+        # pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
 
-        test_generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
-        model.eval()
-        evaluator = Evaluator()
+        # test_generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
+        # model.eval()
+        # evaluator = Evaluator()
 
-        outputs = []
-        labels = []
-        couter = 0
+        # outputs = []
+        # labels = []
+        # couter = 0
 
-        LOGGER.debug("Evaluation in progress")
+        # LOGGER.debug("Evaluation in progress")
 
-        for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(test_generator):
-            pb.print_progress_bar(counter)
+        # for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(test_generator):
+        #     pb.print_progress_bar(counter)
 
-            subset_input_tensor = subset_input_tensor.to(device)
-            subset_input_lengths = subset_input_lengths.to(device)
-            subset_labels_tensor = subset_labels_tensor.to(device)
+        #     subset_input_tensor = subset_input_tensor.to(device)
+        #     subset_input_lengths = subset_input_lengths.to(device)
+        #     subset_labels_tensor = subset_labels_tensor.to(device)
 
-            if("-gpu" in sys.argv):
-                model.lstm.flatten_parameters()
+        #     if("-gpu" in sys.argv):
+        #         model.lstm.flatten_parameters()
 
-            try:
-                output = model(subset_input_tensor, subset_input_lengths)
-            except RuntimeError as ex:
-                print(counter)
-                print(ex)
-                print(subset_input_tensor)
-                print(subset_input_lengths)
-                continue
+        #     try:
+        #         output = model(subset_input_tensor, subset_input_lengths)
+        #     except RuntimeError as ex:
+        #         print(counter)
+        #         print(ex)
+        #         print(subset_input_tensor)
+        #         print(subset_input_lengths)
+        #         continue
             
-            binary_output = (output >= 0.5).short()
-            outputs.extend(binary_output.cpu().detach().numpy())
-            labels.extend(subset_labels_tensor.cpu().detach().numpy())    
-            counter += 1
+        #     binary_output = (output >= 0.5).short()
+        #     outputs.extend(binary_output.cpu().detach().numpy())
+        #     labels.extend(subset_labels_tensor.cpu().detach().numpy())    
+        #     counter += 1
         
-        evaluator.evaluate(labels, outputs)
+        # evaluator.evaluate(labels, outputs)
 
     
     if("-predict" in sys.argv):
