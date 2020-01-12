@@ -14,6 +14,7 @@ import numpy as np
 import json
 import sys
 import string
+import pickle
 
 PROP = "CURRENT_DATA"
 VALUE = "./data/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml"
@@ -142,10 +143,19 @@ class DataExplorer():
             self.analyzeByDomain(domain, arr)
             self.calculateGlobalData(arr)
             pb.print_progress_bar(idx)
+        self.serializeResultsDict()
 
     def calculateGlobalData(self, arr):
         # 1# Get data for global punctuation marks count
         pass
+
+    def loadResultsDict(self):
+        with open(self.config.readValue("results_dict"), "rb") as file:
+            self.analyzedDataByDomain = pickle.load(file)
+
+    def serializeResultsDict(self):
+        with open(self.config.readValue("results_dict"), "wb") as file:
+            pickle.dump(self.analyzedDataByDomain, file)
 
     def analyzeByDomain(self,domain, arr):
         """
@@ -217,6 +227,8 @@ class DataExplorer():
             pp = self.PlotPresentation(self)
             pp.plotTextLengthByDomain()
             pp.plotPunctutionMarksByDomain()
+            pp.plotTextLengthByDomainCharacters()
+            pp.plotCapitalLettersByDomain()
 
     class PlotPresentation:
         def __init__(self, parent):
@@ -255,6 +267,30 @@ class DataExplorer():
             self.autolabel(rects2, ax)
 
             fig.tight_layout()
+            plt.savefig(self.plotPath+'mean_positive_negative_by_domain_characters.png')
+            plt.show()
+
+        def plotTextLengthByDomainCharacters(self):
+            labels = self.parent.domains
+            negativeMeans = [int(self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityNegativeChars']) for x in labels]
+            positiveMeans = [int(self.parent.analyzedDataByDomain[x]['averageTextLengthWhenPolarityPositiveChars']) for x in labels]
+            x = np.arange(len(labels))
+            width = 0.35
+
+            fig, ax = plt.subplots()
+            rects1 = ax.bar(x - width/2, negativeMeans, width, label='Mean Positive Length')
+            rects2 = ax.bar(x + width/2, positiveMeans, width, label='Mean Negative Length')
+
+            ax.set_ylabel('Domains')
+            ax.set_title('Mean positive and negative text length (characters) by domain')
+            ax.set_xticks(x)
+            ax.set_xticklabels(labels)
+            ax.legend()
+
+            self.autolabel(rects1, ax)
+            self.autolabel(rects2, ax)
+
+            fig.tight_layout()
             plt.savefig(self.plotPath+'mean_positive_negative_by_domain.png')
             plt.show()
 
@@ -283,6 +319,31 @@ class DataExplorer():
             plt.savefig(self.plotPath+'mean_punctuation_by_domain.png')
             plt.show()
 
+        def plotCapitalLettersByDomain(self):
+            labels = self.parent.domains
+            positiveMarks = [int(self.parent.analyzedDataByDomain[x]['averageNumberOfCapitalLettersPolarityPositive']) for x in labels]
+            negativeMarks = [int(self.parent.analyzedDataByDomain[x]['averageNumberOfCapitalLettersPolarityNegative']) for x in labels]
+
+            x = np.arange(len(labels))
+            width = 0.35
+
+            fig, ax = plt.subplots()
+            rects1 = ax.bar(x - width/2, positiveMarks, width, label='Mean Positive Number')
+            rects2 = ax.bar(x + width/2, negativeMarks, width, label='Mean Negative Number')
+
+            ax.set_ylabel('Domains')
+            ax.set_title('Mean positive and negative count of caputal letters by domain')
+            ax.set_xticks(x)
+            ax.set_xticklabels(labels)
+            ax.legend()
+
+            self.autolabel(rects1, ax)
+            self.autolabel(rects2, ax)
+
+            fig.tight_layout()
+            plt.savefig(self.plotPath+'mean_capital_letters_by_domain.png')
+            plt.show()
+
 
         
 
@@ -304,11 +365,14 @@ if __name__ == "__main__":
         de.readData()
 
     # Initial analysis
-    de.analyzeAllDomains()
+    if("-results" in sys.argv):
+        de.analyzeAllDomains()
 
     if("-dump" in sys.argv):
+        de.loadResultsDict()
         de.dumpResultsToJSON()
 
     if("-plot" in sys.argv):
+        de.loadResultsDict()
         de.preparePlotPresentation()
 

@@ -387,3 +387,24 @@ if __name__ == "__main__":
 
     elif("-vocab") in sys.argv:
         rp.buildVocabulary()
+
+    # Jakies pomocnicze skrypty do generowania rzeczy do pracy
+    else:
+        # df = pd.DataFrame(columns = ["Domain", "Mean text length (positive)", "Mean text length (negative)"])
+        # temp = {}
+        # rp.loadResults()
+        # for idx, (key, value) in enumerate(zip(rp.results.keys(), rp.results.values())):
+        #     temp[idx] = {"Domain": key, "Mean text length (positive)": value['averageTextLengthWhenPolarityPositiveWords'], "Mean text length (negative)": value['averageTextLengthWhenPolarityNegativeWords']}
+
+        # results = pd.DataFrame.from_dict(temp, "index")
+        # # print(results)
+        # results.to_csv("pom.csv", sep = ";", index = False)
+
+        temp = {}
+        rp.loadResults()
+        for idx, (key, value) in enumerate(zip(rp.results.keys(), rp.results.values())):
+            temp[idx] = {"Domain": key, "Mean text length (positive)": value['averageTextLengthWhenPolarityPositiveChars'], "Mean text length (negative)": value['averageTextLengthWhenPolarityNegativeChars']}
+
+        results = pd.DataFrame.from_dict(temp, "index")
+        # print(results)
+        results.to_csv("pom2.csv", sep = ";", index = False)

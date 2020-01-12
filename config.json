@@ -35,5 +35,6 @@
   "processed_test_set":"processed/test_set.csv",
   "lstm_model_path":"lstm.state",
   "processed":"./processed/",
-  "vocabulary":"vocabulary.pickl"
+  "vocabulary":"vocabulary.pickl",
+  "results_dict":"results.pickl"
 }
