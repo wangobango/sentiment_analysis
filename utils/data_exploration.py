@@ -111,7 +111,8 @@ class DataExplorer():
         self.domains = os.listdir(path)
         for topic in self.domains:
             frames[topic] = pd.read_csv('aggregated/'+topic+'.csv', delimiter=',')
-           
+            frames[topic].dropna(inplace = True)
+
         self.frames = frames
 
     def getFrames(self):
@@ -182,15 +183,15 @@ class DataExplorer():
         self.setResultsValue(results, 'averageTextLengthWhenPolarityPositiveWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives'])
         self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeChars', arr, lambda arr, results: np.sum([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'] )
         self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'])
-        self.setResultsValue(results, 'averageTextLengthWhenPolarityNegativeWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'negative']) / results['numberOfNegatives'])
+        self.setResultsValue(results, 'averageTextLengthWhenPolarityPositiveWords', arr, lambda arr, results: np.sum([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives'])
         self.setResultsValue(results, 'averageNumberOfCapitalLettersPolarityPositive', arr, lambda arr, results: np.sum([self.countCapitalLetters(x[2]) for x in arr[:,3:6] if x[0] == 'positive'])/ results['numberOfPositives'])
         self.setResultsValue(results, 'averageNumberOfCapitalLettersPolarityNegative', arr, lambda arr, results: np.sum([self.countCapitalLetters(x[2]) for x in arr[:,3:6] if x[0] == 'negative'])/ results['numberOfNegatives'])
         self.setResultsValue(results, 'stdDevTextLengthWhenPolarityPositive', arr, lambda arr, results: np.std([len(x[2]) for x in arr[:,3:6] if x[0] == 'positive']))
         self.setResultsValue(results, 'stdDevTextLengthWhenpolarityNegative', arr, lambda arr, resutls: np.std([len(x[2]) for x in arr[:,3:6] if x[0] == 'negative']))
         self.setResultsValue(results, 'stdDevNumOfCapitalLettersPolarityPositive', arr, lambda arr, results: np.std([self.countCapitalLetters(x[2]) for x in arr[:,3:6] if x[0] == 'positive']))
         self.setResultsValue(results, 'stdDevNumOfCapitalLettersPolarityNegative', arr, lambda arr, results: np.std([self.countCapitalLetters(x[2]) for x in arr[:,3:6] if x[0] == 'negative']))
-        self.setResultsValue(results, 'covBetweenTextLengthAndNumOfCapitalLetters', arr, lambda arr, resulsts: np.cov(([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6]], [self.countCapitalLetters(x[2]) for x in arr[:,3:6]])))
         self.setResultsValue(results, 'covBetweenTextLengthAndPolarity', arr, lambda arr, results: np.cov(([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6]], [1 if x[0]=='positive' else 0 for x in arr[:,3:6]])))
+        self.setResultsValue(results, 'covBetweenTextLengthAndNumOfCapitalLetters', arr, lambda arr, resulsts: np.cov(([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6]], [self.countCapitalLetters(x[2]) for x in arr[:,3:6]])))
         self.setResultsValue(results, 'personCorBetweenTextLengthAndNumOfCapitalLetters', arr, lambda arr, results: np.corrcoef(([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6]], [1 if x[0]=='positive' else 0 for x in arr[:,3:6]])))
         self.setResultsValue(results, 'personCorBetweenTextLengthAndPolarity', arr, lambda arr, results: np.corrcoef(([len(tokenizer.tokenize(x[2])) for x in arr[:,3:6]], [1 if x[0]=='positive' else 0 for x in arr[:,3:6]])))
         self.setResultsValue(results, 'meanPunctuationMarksPolarityPositive', arr, lambda arr, results: np.sum([count(x[2], string.punctuation) for x in arr[:,3:6] if x[0] == 'positive']) / results['numberOfPositives'] )

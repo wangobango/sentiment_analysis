@@ -174,6 +174,7 @@ if __name__ == "__main__":
         
         optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         scheduler = lr_scheduler.CosineAnnealingLR(optimizer, len(data['embedding']), eta_min=learning_rate)
+
         LOGGER.debug("Training in progress")
         LOGGER.debug("Training on set of size: {}".format(len(data['embedding'])))
         pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
@@ -191,8 +192,15 @@ if __name__ == "__main__":
                 subset_input_lengths = subset_input_lengths.to(device)
                 subset_labels_tensor = subset_labels_tensor.to(device)
         
-                output = model(subset_input_tensor, subset_input_lengths)
-            
+                try:
+                    output = model(subset_input_tensor, subset_input_lengths)
+                except RuntimeError as ex:
+                    print(counter)
+                    print(ex)
+                    print(subset_input_tensor)
+                    print(subset_input_lengths)
+                    continue
+                    
                 loss = criterion(output, subset_labels_tensor.float())
                 
                 optimizer.zero_grad() 
@@ -219,13 +227,17 @@ if __name__ == "__main__":
 
         LOGGER.debug("Training finished")
 
-        with open(conf.readValue("lstm_model_path"), "wb") as file:
-            pickle.dump(model, file)
+        # with open(conf.readValue("lstm_model_path"), "wb") as file:
+        #     pickle.dump(model, file)
+        torch.save(model.state_dict(), conf.readValue("lstm_model_path"))
         LOGGER.debug("Model serialized")
         
     if("-test" in sys.argv):
-        with open(conf.readValue("lstm_model_path"), "rb") as file:
-            model = pickle.load(file)
+        # with open(conf.readValue("lstm_model_path"), "rb") as file:
+        #     model = pickle.load(file)
+        model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
+
 
         if("-gpu" in sys.argv):
             model.cuda(device)
@@ -251,8 +263,16 @@ if __name__ == "__main__":
 
             if("-gpu" in sys.argv):
                 model.lstm.flatten_parameters()
-            output = model(subset_input_tensor, subset_input_lengths)
 
+            try:
+                output = model(subset_input_tensor, subset_input_lengths)
+            except RuntimeError as ex:
+                print(counter)
+                print(ex)
+                print(subset_input_tensor)
+                print(subset_input_lengths)
+                continue
+            
             binary_output = (output >= 0.5).short()
             outputs.extend(binary_output.cpu().detach().numpy())
             labels.extend(subset_labels_tensor.cpu().detach().numpy())    
@@ -262,8 +282,11 @@ if __name__ == "__main__":
 
     
     if("-predict" in sys.argv):
-        with open(conf.readValue("lstm_model_path"), "rb") as file:
-            model = pickle.load(file)
+        # with open(conf.readValue("lstm_model_path"), "rb") as file:
+        #     model = pickle.load(file)
+        model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
+
         model.eval()
         if("-gpu" in sys.argv):
             model.cuda(device)
@@ -288,11 +311,18 @@ if __name__ == "__main__":
         # print(seq_tensor)
         # print(seq_lengths)
 
-        seq_tensor = seq_tensor.to(device)
-        seq_lengths = seq_lengths.to(device)
-        if("-gpu" in sys.argv):
-                model.lstm.flatten_parameters()
-        output = model(seq_tensor, seq_lengths)
+            seq_tensor = seq_tensor.to(device)
+            seq_lengths = seq_lengths.to(device)
+            if("-gpu" in sys.argv):
+                    model.lstm.flatten_parameters()
+            try:
+                output = model(seq_tensor, seq_lengths)
+            except RuntimeError as ex:
+                print(counter)
+                print(ex)
+                print(seq_tensor)
+                print(seq_lengths)
+                continue
 
         value = output.item()
         label = 'positive' if value >= 0.5 else 'negative'
@@ -305,4 +335,8 @@ if __name__ == "__main__":
         -predict to predict sentence given as 2nd argument
         --log to print logs
         -gpu to enable gpu support (if available)
+"""
+
+"""
+    Jeśli długość była dobrym predyktorem dla baseline'a a lstm sobie nie radził to może dodąć długość do warstwy w pełni połączonej?
 """
