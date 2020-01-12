@@ -28,7 +28,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 """
     Params start
 """
-set_count = 1000
+set_count = 100000
 epochs = 40
 counter = 0
 learning_rate = 0.0001
@@ -39,7 +39,7 @@ embedding_dim = 300
 hidden_dim = 300
 output_size = 1
 n_layers = 2
-batch_size = 40
+batch_size = 50
 
 class DataSampler(object):
     
@@ -262,7 +262,7 @@ if __name__ == "__main__":
                     continue
                     
                 loss = criterion(output, subset_labels_tensor.float())
-                
+                # return
                 optimizer.zero_grad() 
                 loss.backward()
                 
@@ -281,7 +281,7 @@ if __name__ == "__main__":
             # LOGGER.debug(subset_labels_tensor)
             accuracy = sum(correct) / sum(total)
             accuracy_array.append(accuracy)
-            loss_array.append(loss)
+            loss_array.append(loss.item())
             correct.clear()
             total.clear()
             LOGGER.debug("Loss function: {:2f}, accuracy: {:3f}".format(loss, accuracy))
@@ -313,7 +313,7 @@ if __name__ == "__main__":
         df.plot(x ='Epoch', y='Precision', kind = 'line', color='blue', ax=ax)
         df.plot(x ='Epoch', y='Recall', kind = 'line', color='yellow', ax=ax)
         df.plot(x ='Epoch', y='Test set accuracy', kind = 'line', color='purple', ax=ax)
-        df.plot(x ='Epoch', y='Loss', kind = 'line', color='pink', ax=ax)
+        df.plot(x ='Epoch', y='Loss', kind = 'line', color='brown', ax=ax)
         plt.savefig('./accuracy_train_epochs.png')
 
 
