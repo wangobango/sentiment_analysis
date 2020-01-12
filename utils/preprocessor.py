@@ -64,7 +64,7 @@ class Preprocessor:
             lenghts = [self.reduce_lengthening(word) for word in word_tokens]
             word_tokens = [objs['speller'].autocorrect_word(word) for word in lenghts]
         if(flags['stopWords'] == True):
-            word_tokens = [w for w in word_tokens if not w in objs['stop']]
+            word_tokens = [w for w in word_tokens if not w.lower() in objs['stop']]
         if(flags['lemmatize'] == True):
             word_tokens = [objs['lemmatizer'].lemmatize(word) for word in word_tokens]
         if(flags['stem'] == True):
