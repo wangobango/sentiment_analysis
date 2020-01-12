@@ -28,7 +28,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 """
     Params start
 """
-set_count = 100000
+set_count = 1000
 epochs = 40
 counter = 0
 learning_rate = 0.0001
@@ -305,7 +305,7 @@ if __name__ == "__main__":
 
         d = {'Epoch' : range(1,epochs +1), 'Accuracy' : accuracy_array, 'f-score' : fscore_array, 'Loss' : loss_array,
                 'Precision' : precision_array, 'Recall': recall_array, 'Test set accuracy': test_accuracy_array}
-        df = pd.DataFrame(d,columns=['Epoch','Accuracy', 'f-score', 'Precision', 'Recall', 'Test set accuracy'])
+        df = pd.DataFrame(d,columns=['Epoch','Accuracy', 'f-score', 'Precision', 'Recall', 'Test set accuracy', 'Loss'])
         df.to_csv('./metrics_epochs.csv', sep = ';')
         ax = plt.gca()
         df.plot(x ='Epoch', y='Accuracy', kind = 'line', color='red', ax=ax)
