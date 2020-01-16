@@ -29,7 +29,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     Params start
 """
 set_count = 100000
-epochs = 40
+epochs = 5
 counter = 0
 learning_rate = 0.0001
 weight_decay = 0.005
@@ -101,6 +101,7 @@ class PolarityLSTM(nn.Module):
                             dropout=drop_lstm, batch_first=True)
         self.dropout = nn.Dropout(drop_out)
         self.fc = nn.Linear(hidden_dim, output_size)
+        # self.fc = nn.Linear(hidden_dim, output_size)
         self.sig = nn.Sigmoid()
 
     def forward(self, x, seq_lengths):  
@@ -227,6 +228,8 @@ if __name__ == "__main__":
     recall_array = []
     test_accuracy_array = []
     loss_array = []
+    time_array = []
+    start_time = time.time()
     if("-train" in sys.argv):
         model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
         if("-gpu" in sys.argv):
@@ -296,6 +299,8 @@ if __name__ == "__main__":
             precision_array.append(metrics['precision'])
             recall_array.append(metrics['recall'])
             test_accuracy_array.append(metrics['accuracy'])
+            time_array.append(time.time() - start_time)
+            start_time = time.time()
 
         LOGGER.debug("Training finished")
         # f = open('./accuracy_train_epochs.txt', 'w')
@@ -304,8 +309,8 @@ if __name__ == "__main__":
         # f.close()
 
         d = {'Epoch' : range(1,epochs +1), 'Accuracy' : accuracy_array, 'f-score' : fscore_array, 'Loss' : loss_array,
-                'Precision' : precision_array, 'Recall': recall_array, 'Test set accuracy': test_accuracy_array}
-        df = pd.DataFrame(d,columns=['Epoch','Accuracy', 'f-score', 'Precision', 'Recall', 'Test set accuracy', 'Loss'])
+                'Precision' : precision_array, 'Recall': recall_array, 'Test set accuracy': test_accuracy_array, 'Learning time': time_array}
+        df = pd.DataFrame(d,columns=['Epoch','Accuracy', 'f-score', 'Precision', 'Recall', 'Test set accuracy', 'Loss', 'Learning time'])
         df.to_csv('./metrics_epochs.csv', sep = ';')
         ax = plt.gca()
         df.plot(x ='Epoch', y='Accuracy', kind = 'line', color='red', ax=ax)
