@@ -35,10 +35,10 @@ learning_rate = 0.0001
 weight_decay = 0.005
 momentum = 0.9
 clip = 5
-embedding_dim = 150
+embedding_dim = 300
 hidden_dim = 300
 output_size = 1
-n_layers = 3
+n_layers = 2
 batch_size = 50
 
 class DataSampler(object):
@@ -100,8 +100,8 @@ class PolarityLSTM(nn.Module):
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers, 
                             dropout=drop_lstm, batch_first=True)
         self.dropout = nn.Dropout(drop_out)
-        self.fc = nn.Linear(hidden_dim, output_size)
-        # self.fc = nn.Linear(hidden_dim, output_size)
+        self.fc = nn.Linear(hidden_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, output_size)
         self.sig = nn.Sigmoid()
 
     def forward(self, x, seq_lengths):  
