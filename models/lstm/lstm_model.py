@@ -165,7 +165,7 @@ def test(test_data, labels):
     # with open(conf.readValue("lstm_model_path"), "rb") as file:
     #     model = pickle.load(file)
     if("-gru" in sys.argv):
-            model = PolarityGRU(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        model = PolarityGRU(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
     else:
         model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
     
@@ -196,7 +196,7 @@ def test(test_data, labels):
         subset_labels_tensor = subset_labels_tensor.to(device)
 
         if("-gpu" in sys.argv):
-            model.lstm.flatten_parameters()
+            model.gru.flatten_parameters()
 
         try:
             output = model(subset_input_tensor, subset_input_lengths)
