@@ -36,7 +36,7 @@ weight_decay = 0.005
 momentum = 0.9
 clip = 5
 embedding_dim = 300
-hidden_dim = 150
+hidden_dim = 300
 output_size = 1
 n_layers = 2
 batch_size = 50
@@ -133,8 +133,10 @@ class PolarityLSTM(nn.Module):
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers, 
                             dropout=drop_lstm, batch_first=True)
         self.dropout = nn.Dropout(drop_out)
-        self.fc = nn.Linear(hidden_dim, hidden_dim)
-        self.sig = nn.ReLU()
+        # self.fc = nn.Linear(hidden_dim, int(hidden_dim/2))
+        # self.sig = nn.ReLU()
+        # self.fc2 = nn.Linear(int(hidden_dim/2), output_size)
+        # self.sig2 = nn.Sigmoid()
         self.fc2 = nn.Linear(hidden_dim, output_size)
         self.sig2 = nn.Sigmoid()
 
@@ -149,8 +151,8 @@ class PolarityLSTM(nn.Module):
         output = torch.gather(output, 1, last_idxs.view(-1, 1).unsqueeze(2).repeat(1, 1, self.hidden_dim)).squeeze() 
 
         output = self.dropout(output)
-        output = self.fc(output).squeeze()
-        output = self.sig(output)
+        # output = self.fc(output).squeeze()
+        # output = self.sig(output)
         output = self.fc2(output).squeeze()
         output = self.sig2(output)
         
@@ -272,8 +274,10 @@ if __name__ == "__main__":
     start_time = time.time()
     if("-train" in sys.argv):
         if("-gru" in sys.argv):
+            LOGGER.debug("training GRU model")
             model = PolarityGRU(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
         else:
+            LOGGER.debug("training LSTM model")
             model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
         if("-gpu" in sys.argv):
             model.cuda(device)
@@ -326,8 +330,6 @@ if __name__ == "__main__":
             # LOGGER.debug(binary_output)
             # LOGGER.debug(subset_labels_tensor)
             accuracy = sum(correct) / sum(total)
-            accuracy_array.append(accuracy)
-            loss_array.append(loss.item())
             correct.clear()
             total.clear()
             LOGGER.debug("Loss function: {:2f}, accuracy: {:3f}".format(loss, accuracy))
@@ -338,6 +340,8 @@ if __name__ == "__main__":
 
             # model.train()
 
+            accuracy_array.append(accuracy)
+            loss_array.append(loss.item())
             fscore_array.append(metrics['f-score'])
             precision_array.append(metrics['precision'])
             recall_array.append(metrics['recall'])
