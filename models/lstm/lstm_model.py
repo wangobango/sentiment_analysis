@@ -195,8 +195,10 @@ def test(test_data, labels):
         subset_input_lengths = subset_input_lengths.to(device)
         subset_labels_tensor = subset_labels_tensor.to(device)
 
-        if("-gpu" in sys.argv):
+        if("-gpu" in sys.argv and "-gru" in sys.argv):
             model.gru.flatten_parameters()
+        elif("-gpu" in sys.argv):
+            model.lstm.flatten_parameters()
 
         try:
             output = model(subset_input_tensor, subset_input_lengths)
