@@ -88,6 +88,39 @@ class DataSampler(object):
         
         return data, test 
 
+
+class PolarityGRU(nn.Module):
+    def __init__(self, embedding_dim, vocab_size, hidden_dim, output_size, n_layers, drop_lstm=0.1, drop_out = 0.1):
+        super().__init__()
+
+        self.output_size = output_size
+        self.n_layers = n_layers
+        self.hidden_dim = hidden_dim
+
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.gru = nn.GRU(embedding_dim, hidden_dim, n_layers, 
+                            dropout=drop_lstm, batch_first=True)
+        self.dropout = nn.Dropout(drop_out)
+        # self.fc2 = nn.Linear(hidden_dim, hidden_dim)
+        self.fc = nn.Linear(hidden_dim, output_size)
+        self.sig = nn.Sigmoid()
+
+    def forward(self, x, seq_lengths):  
+        embedded_seq_tensor = self.embedding(x)
+        packed_input = pack_padded_sequence(embedded_seq_tensor, seq_lengths.cpu().numpy(), batch_first=True)
+
+        packed_output, (ht, ct) = self.gru(packed_input, None)
+        output, input_sizes = pad_packed_sequence(packed_output, batch_first=True)
+       
+        last_idxs = (input_sizes - 1).to(device) 
+        output = torch.gather(output, 1, last_idxs.view(-1, 1).unsqueeze(2).repeat(1, 1, self.hidden_dim)).squeeze() 
+
+        output = self.dropout(output)
+        output = self.fc(output).squeeze()
+        output = self.sig(output)
+        
+        return output
+
 class PolarityLSTM(nn.Module):
     def __init__(self, embedding_dim, vocab_size, hidden_dim, output_size, n_layers, drop_lstm=0.1, drop_out = 0.1):
         super().__init__()
@@ -100,8 +133,8 @@ class PolarityLSTM(nn.Module):
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers, 
                             dropout=drop_lstm, batch_first=True)
         self.dropout = nn.Dropout(drop_out)
-        self.fc = nn.Linear(hidden_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, output_size)
+        # self.fc2 = nn.Linear(hidden_dim, hidden_dim)
+        self.fc = nn.Linear(hidden_dim, output_size)
         self.sig = nn.Sigmoid()
 
     def forward(self, x, seq_lengths):  
@@ -126,7 +159,11 @@ def criterion(out, label):
 def test(test_data, labels):
     # with open(conf.readValue("lstm_model_path"), "rb") as file:
     #     model = pickle.load(file)
-    model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+    if("-gru" in sys.argv):
+            model = PolarityGRU(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+    else:
+        model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+    
     model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
 
 
@@ -231,7 +268,10 @@ if __name__ == "__main__":
     time_array = []
     start_time = time.time()
     if("-train" in sys.argv):
-        model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        if("-gru" in sys.argv):
+            model = PolarityGRU(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+        else:
+            model = PolarityLSTM(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
         if("-gpu" in sys.argv):
             model.cuda(device)
         generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
