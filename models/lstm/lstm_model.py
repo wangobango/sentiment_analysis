@@ -28,7 +28,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 """
     Params start
 """
-set_count = 100000
+set_count = 24
 epochs = 40
 counter = 0
 learning_rate = 0.0001
@@ -101,8 +101,9 @@ class PolarityLSTM(nn.Module):
                             dropout=drop_lstm, batch_first=True)
         self.dropout = nn.Dropout(drop_out)
         self.fc = nn.Linear(hidden_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, output_size)
         self.sig = nn.Sigmoid()
+        self.fc2 = nn.Linear(hidden_dim, output_size)
+        self.sig2 = nn.Sigmoid()
 
     def forward(self, x, seq_lengths):  
         embedded_seq_tensor = self.embedding(x)
@@ -117,6 +118,8 @@ class PolarityLSTM(nn.Module):
         output = self.dropout(output)
         output = self.fc(output).squeeze()
         output = self.sig(output)
+        output = self.fc2(output).squeeze()
+        output = self.sig2(output)
         
         return output
 
