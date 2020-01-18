@@ -29,14 +29,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     Params start
 """
 set_count = 100000
-epochs = 40
+epochs = 80
 counter = 0
 learning_rate = 0.0001
 weight_decay = 0.005
 momentum = 0.9
 clip = 5
 embedding_dim = 300
-hidden_dim = 300
+hidden_dim = 150
 output_size = 1
 n_layers = 2
 batch_size = 50
