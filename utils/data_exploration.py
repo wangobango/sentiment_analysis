@@ -260,7 +260,7 @@ class DataExplorer():
             ax.set_ylabel('Domains')
             ax.set_title('Mean positive and negative text length by domain')
             ax.set_xticks(x)
-            ax.set_xticklabels(labels)
+            ax.set_xticklabels(labels, rotation = 70)
             ax.legend()
 
             self.autolabel(rects1, ax)
@@ -284,7 +284,7 @@ class DataExplorer():
             ax.set_ylabel('Domains')
             ax.set_title('Mean positive and negative text length (characters) by domain')
             ax.set_xticks(x)
-            ax.set_xticklabels(labels)
+            ax.set_xticklabels(labels, rotation = 70)
             ax.legend()
 
             self.autolabel(rects1, ax)
@@ -309,7 +309,7 @@ class DataExplorer():
             ax.set_ylabel('Domains')
             ax.set_title('Mean positive and negative count of punctuation marks by domain')
             ax.set_xticks(x)
-            ax.set_xticklabels(labels)
+            ax.set_xticklabels(labels, rotation = 70)
             ax.legend()
 
             self.autolabel(rects1, ax)
@@ -332,9 +332,9 @@ class DataExplorer():
             rects2 = ax.bar(x + width/2, negativeMarks, width, label='Mean Negative Number')
 
             ax.set_ylabel('Domains')
-            ax.set_title('Mean positive and negative count of caputal letters by domain')
+            ax.set_title('Mean positive and negative count of capital letters by domain')
             ax.set_xticks(x)
-            ax.set_xticklabels(labels)
+            ax.set_xticklabels(labels, rotation = 70)
             ax.legend()
 
             self.autolabel(rects1, ax)
