@@ -160,17 +160,17 @@ class MeanLengthBaseLine:
         if("lenData" in f):
             lenData = np.array([len(tokenizer.tokenize(x)) for idx, x in enumerate(
                 testSet['text']) ])
-            features.extend(lenData)
+            features.append(lenData)
             numOfFeatures += 1
         if("capitals" in f):
             capitalLettersData = np.array([self.countCapitalLetters(x) for idx, x in enumerate(
                 testSet['text']) ])
-            features.extend(capitalLettersData)
+            features.append(capitalLettersData)
             numOfFeatures += 1
         if("punctuation" in f):
             punctuationMarksData = np.array([count(x, string.punctuation) for idx, x in enumerate(
                 testSet['text']) ])
-            features.extend(punctuationMarksData)
+            features.append(punctuationMarksData)
             numOfFeatures += 1
 
         features = np.asarray(features)
