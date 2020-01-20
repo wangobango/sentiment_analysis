@@ -79,7 +79,7 @@ class MeanLengthBaseLine:
 
 
     def teachLinearRegressionModel(self, domain, f):
-        model = SGDClassifier(verbose=1)
+        model = SGDClassifier(verbose=0)
         tokenizer = RegexpTokenizer(r'\w+')
         def count(l1, l2): return len(list(filter(lambda c: c in l2, l1)))
 
