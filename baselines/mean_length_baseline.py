@@ -130,11 +130,11 @@ class MeanLengthBaseLine:
         self.testSet.dropna(inplace=True)
         # self.testSet = self.testSet[:1000]
 
-    def evaluateModelWrapper(self, features):
+    def evaluateModelWrapper(self, f):
         correctPredictions_array = []
         predictions_array = []
         for domain, model in self.models.items():
-            features, correctPredictions = self.evaluateModel(domain, model, features)
+            features, correctPredictions = self.evaluateModel(domain, model, f)
             # print('feat:')
             # print(features)
             # print('correct:')
@@ -146,10 +146,10 @@ class MeanLengthBaseLine:
             # print(pred)
             # self.evaluator.evaluate(correctPredictions_array, predictions_array)
             self.evaluator.evaluate(correctPredictions, pred)
-            self.results = self.results.append({'domain': domain,'features': features, "n_features": len(features), "accuracy": self.evaluator.getAccuracy(), "precision": self.evaluator.getPrecision(), "recall": self.evaluator.getRecall(), "fscore": self.evaluator.getFScore() }, ignore_index = True)
+            self.results = self.results.append({'domain': domain,'features': f, "n_features": len(f), "accuracy": self.evaluator.getAccuracy(), "precision": self.evaluator.getPrecision(), "recall": self.evaluator.getRecall(), "fscore": self.evaluator.getFScore() }, ignore_index = True)
         print("\nEvaluation results:")
         self.evaluator.evaluate(correctPredictions_array, predictions_array)
-        self.results = self.results.append({'domain':'all','features': features, "n_features": len(features), "accuracy": self.evaluator.getAccuracy(), "precision": self.evaluator.getPrecision(), "recall": self.evaluator.getRecall(), "fscore": self.evaluator.getFScore() }, ignore_index = True)
+        self.results = self.results.append({'domain':'all','features': f, "n_features": len(f), "accuracy": self.evaluator.getAccuracy(), "precision": self.evaluator.getPrecision(), "recall": self.evaluator.getRecall(), "fscore": self.evaluator.getFScore() }, ignore_index = True)
 
 
 
