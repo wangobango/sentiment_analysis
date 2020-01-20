@@ -23,7 +23,7 @@ class MeanLengthBaseLine:
         self.evaluator = Evaluator()
         self.corruptedData = {}
         self.models = {}
-        self.results = pd.DataFrame(columns = ["features", "n_features", "accuracy", "precision", "recall", "fscore"])
+        self.results = pd.DataFrame(columns = ["domain", "features", "n_features", "accuracy", "precision", "recall", "fscore"])
 
     def checkDataCorectness(self, setType='data'):
         tokenizer = RegexpTokenizer(r'\w+')
@@ -64,12 +64,15 @@ class MeanLengthBaseLine:
         for idx, f in enumerate(ss):
             if(idx == 0):
                 continue
-            print(list(f))
+            feet = list(f)
+            print(feet)
+            if(len(feet) == 0 ):
+                continue
             for domain in domains:
-                self.models[domain] = self.teachLinearRegressionModel(domain, list(f))
+                self.models[domain] = self.teachLinearRegressionModel(domain, feet)
             if("-all" in sys.argv):
                 self.readTestSet()
-                self.evaluateModelWrapper(list(f))
+                self.evaluateModelWrapper(feet)
                 self.results.to_csv("dupa.csv", sep=";")
 
         self.results.to_csv("dupa.csv", sep=";")
@@ -140,14 +143,17 @@ class MeanLengthBaseLine:
             # print('predicted')
             # print(pred)
             # self.evaluator.evaluate(correctPredictions_array, predictions_array)
+            self.results = self.results.append({'domain': domain,'features': features, "n_features": len(features), "accuracy": self.evaluator.getAccuracy(), "precision": self.evaluator.getPrecision(), "recall": self.evaluator.getRecall(), "fscore": self.evaluator.getFScore() }, ignore_index = True)
         print("\nEvaluation results:")
         self.evaluator.evaluate(correctPredictions_array, predictions_array)
-        self.results = self.results.append({'features': features, "n_features": len(features), "accuracy": self.evaluator.getAccuracy(), "precision": self.evaluator.getPrecision(), "recall": self.evaluator.getRecall(), "fscore": self.evaluator.getFScore() }, ignore_index = True)
+        self.results = self.results.append({'domain':'all','features': features, "n_features": len(features), "accuracy": self.evaluator.getAccuracy(), "precision": self.evaluator.getPrecision(), "recall": self.evaluator.getRecall(), "fscore": self.evaluator.getFScore() }, ignore_index = True)
 
 
 
     def evaluateModel(self, domain, model, f):
         print('evaluating domain: ' + domain)
+        print(f)
+
         tokenizer = RegexpTokenizer(r'\w+')
         def count(l1, l2): return len(list(filter(lambda c: c in l2, l1)))
 
