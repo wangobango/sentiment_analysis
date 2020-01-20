@@ -69,9 +69,11 @@ class MeanLengthBaseLine:
             if(len(feet) == 0 ):
                 continue
             for domain in domains:
+                print("Teaching for domain:{}, and features: {}".format(domain, feet))
                 self.models[domain] = self.teachLinearRegressionModel(domain, feet)
             if("-all" in sys.argv):
                 self.readTestSet()
+                print("Evaluating")
                 self.evaluateModelWrapper(feet)
                 self.results.to_csv("dupa.csv", sep=";")
 
@@ -143,6 +145,7 @@ class MeanLengthBaseLine:
             # print('predicted')
             # print(pred)
             # self.evaluator.evaluate(correctPredictions_array, predictions_array)
+            self.evaluator.evaluate(correctPredictions, pred)
             self.results = self.results.append({'domain': domain,'features': features, "n_features": len(features), "accuracy": self.evaluator.getAccuracy(), "precision": self.evaluator.getPrecision(), "recall": self.evaluator.getRecall(), "fscore": self.evaluator.getFScore() }, ignore_index = True)
         print("\nEvaluation results:")
         self.evaluator.evaluate(correctPredictions_array, predictions_array)
