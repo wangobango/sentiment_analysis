@@ -70,6 +70,7 @@ class MeanLengthBaseLine:
             if("-all" in sys.argv):
                 self.readTestSet()
                 self.evaluateModelWrapper(list(f))
+                self.results.to_csv("dupa.csv", sep=";")
 
         self.results.to_csv("dupa.csv", sep=";")
 
