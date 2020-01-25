@@ -352,6 +352,7 @@ if __name__ == "__main__":
                         model = PolarityGRU(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
                         model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
                         model.cuda(device)
+                        model.train()
                         continue
                         
                     loss = criterion(output, subset_labels_tensor.float())
