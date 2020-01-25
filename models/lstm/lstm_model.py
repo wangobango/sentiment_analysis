@@ -312,8 +312,8 @@ if __name__ == "__main__":
                 except RuntimeError as ex:
                     print(counter)
                     print(ex)
-                    print(subset_input_tensor)
-                    print(subset_input_lengths)
+                    # print(subset_input_tensor)
+                    # print(subset_input_lengths)
                     continue
                     
                 loss = criterion(output, subset_labels_tensor.float())
