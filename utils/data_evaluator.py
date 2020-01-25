@@ -21,7 +21,20 @@ class Evaluator:
         evaluatedMetircs[self.RECALL] = self.calculate_recall()
         evaluatedMetircs[self.FSCORE] = self.calculate_fscore(evaluatedMetircs[self.PRECISION], evaluatedMetircs[self.RECALL])
         self.print(evaluatedMetircs)
+        self.evaluatedMetircs = evaluatedMetircs
         return evaluatedMetircs
+
+    def getRecall(self):
+        return self.evaluatedMetircs[self.RECALL]
+
+    def getPrecision(self):
+        return self.evaluatedMetircs[self.PRECISION]
+
+    def getAccuracy(self):
+        return self.evaluatedMetircs[self.ACCURACY]
+
+    def getFScore(self):
+        return self.evaluatedMetircs[self.FSCORE]    
 
     def calculate_precision(self):
         return self.tp / (self.tp + self.fp)
