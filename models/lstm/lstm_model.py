@@ -24,7 +24,8 @@ from utils.preprocessor import Preprocessor
 
 TOKENIZER = RegexpTokenizer(r'\w+')
 LOGGER = logging.getLogger('lstm_model')
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cpu"
 np.set_printoptions(threshold=sys.maxsize)
 
 """
@@ -345,7 +346,6 @@ if __name__ == "__main__":
                         print(subset_input_tensor_tmp)
                         print(subset_input_lengths_tmp)
                         print(subset_labels_tensor_tmp)
-                        model.cuda(device)
                         continue
                         
                     loss = criterion(output, subset_labels_tensor.float())
