@@ -259,7 +259,7 @@ if __name__ == "__main__":
             # data = data[:set_count]
             
             data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
-            data = data[data['embedding'] != ':']
+            # data = data[data['embedding'] != ':']
         LOGGER.debug("offset: " + str(dupa*chunk_size))
         # elif("-test" in sys.argv):
         test_data = pd.read_csv(conf.readValue("processed_test_set"), sep=";")
@@ -275,10 +275,13 @@ if __name__ == "__main__":
         LOGGER.debug("Vectorization and tokenization")
         for seq in data['embedding']:
             value = [vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)]
-            # if len(value) > 0:
-            vectorized_seqs.append(value)
+            if len(value) > 0:
+                vectorized_seqs.append(value)
+            else:
+                vectorized_seqs.append([1])
 
         seq_lengths = torch.LongTensor(list(map(len, vectorized_seqs)))
+
 
         labels = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, data['polarity'])))
         labels = torch.LongTensor(data['polarity'])
