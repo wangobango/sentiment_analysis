@@ -226,7 +226,6 @@ def add_excluded_batch(number):
 def get_excluded_batches():
     f = open("./excluded_batches.txt", "r")
     tmp = f.read()
-    if
     batches = tmp.split(",")
     batches_as_int = []
     for i in batches[:-1]:
