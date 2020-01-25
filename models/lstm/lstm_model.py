@@ -228,7 +228,7 @@ if __name__ == "__main__":
     with open(conf.readValue("vocabulary"), "rb") as f:
         vocabulary = pickle.load(f)
 
-    chunk_size = 100000
+    chunk_size = 50000
     
     vocab_size = vocabulary.getVocabLength()
 
@@ -278,6 +278,7 @@ if __name__ == "__main__":
             if isinstance(seq, str): 
                 vectorized_seqs.append([vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)])
             else:
+                print("Sterna żre gówno i robi loda hitlerowi")
                 vectorized_seqs.append([])
 
         seq_lengths = torch.LongTensor(list(map(len, vectorized_seqs)))
