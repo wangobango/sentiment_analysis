@@ -41,7 +41,7 @@ embedding_dim = 150
 hidden_dim = 300
 output_size = 1
 n_layers = 2
-batch_size = 50
+batch_size = 20
 
 class DataSampler(object):
     
@@ -335,12 +335,11 @@ if __name__ == "__main__":
                     pb.print_progress_bar(counter)
                     counter += 1
                         
+                    subset_input_tensor = subset_input_tensor.to(device)
+                    subset_input_lengths = subset_input_lengths.to(device)
+                    subset_labels_tensor = subset_labels_tensor.to(device)
+
                     try:
-                        subset_input_tensor = subset_input_tensor.to(device)
-                        subset_input_lengths = subset_input_lengths.to(device)
-                        subset_labels_tensor = subset_labels_tensor.to(device)
-            
-                    
                         output = model(subset_input_tensor, subset_input_lengths)
                     except RuntimeError as ex:
                         print(counter)
