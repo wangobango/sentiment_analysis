@@ -324,6 +324,9 @@ if __name__ == "__main__":
                 correct = []
                 total = []
                 for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(generator):
+                    # print(subset_input_tensor, subset_input_lengths, subset_labels_tensor)
+
+                    subset_input_tensor_tmp, subset_input_lengths_tmp, subset_labels_tensor_tmp = subset_input_tensor, subset_input_lengths, subset_labels_tensor
                     pb.print_progress_bar(counter)
                     counter += 1
                         
@@ -336,8 +339,9 @@ if __name__ == "__main__":
                     except RuntimeError as ex:
                         print(counter)
                         print(ex)
-                        print(subset_input_tensor)
-                        print(subset_input_lengths)
+                        print(subset_input_tensor_tmp)
+                        print(subset_input_lengths_tmp)
+                        print(subset_labels_tensor_tmp)
                         continue
                         
                     loss = criterion(output, subset_labels_tensor.float())
