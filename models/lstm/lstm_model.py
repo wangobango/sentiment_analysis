@@ -353,6 +353,10 @@ if __name__ == "__main__":
                     subset_input_tensor_tmp, subset_input_lengths_tmp, subset_labels_tensor_tmp = subset_input_tensor, subset_input_lengths, subset_labels_tensor
                     pb.print_progress_bar(counter)
                     counter += 1
+
+                    if(counter % 1000 == 0):
+                        model.cuda.empty_cache()
+
                     if(counter in excluded_batches):
                         counter +=1
                         continue
