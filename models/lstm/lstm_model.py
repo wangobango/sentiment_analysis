@@ -24,8 +24,7 @@ from utils.preprocessor import Preprocessor
 
 TOKENIZER = RegexpTokenizer(r'\w+')
 LOGGER = logging.getLogger('lstm_model')
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = "cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 np.set_printoptions(threshold=sys.maxsize)
 
 """
@@ -220,7 +219,6 @@ def test(test_data, labels):
     return evaluator.evaluate(labels, outputs)
 
 
-
 if __name__ == "__main__":
     if "--log" in sys.argv:
             logging.basicConfig(level=logging.DEBUG)
@@ -228,7 +226,7 @@ if __name__ == "__main__":
     with open(conf.readValue("vocabulary"), "rb") as f:
         vocabulary = pickle.load(f)
 
-    chunk_size = 50000
+    chunk_size = 700000
     
     vocab_size = vocabulary.getVocabLength()
 
@@ -250,7 +248,7 @@ if __name__ == "__main__":
         if("-gpu" in sys.argv):
             model.cuda(device)
 
-    for dupa in range(4,7):
+    for dupa in range(1):
 
         LOGGER.debug("Reading data")
         if("-train" in sys.argv):
@@ -261,10 +259,11 @@ if __name__ == "__main__":
             # data = data[:set_count]
             
             data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+            data = data[data['embedding'] != ':']
         LOGGER.debug("offset: " + str(dupa*chunk_size))
         # elif("-test" in sys.argv):
         test_data = pd.read_csv(conf.readValue("processed_test_set"), sep=";")
-        test_data = test_data[:int(0.3*set_count)]
+        test_data = test_data[:int(0.5*set_count)]
         test_data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
 
         vocab_size = vocabulary.getVocabLength()
@@ -275,14 +274,13 @@ if __name__ == "__main__":
 
         LOGGER.debug("Vectorization and tokenization")
         for seq in data['embedding']:
-            if isinstance(seq, str): 
-                vectorized_seqs.append([vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)])
-            else:
-                print("Sterna żre gówno i robi loda hitlerowi")
-                vectorized_seqs.append([])
+            value = [vocab_to_int.get(word,1) for word in TOKENIZER.tokenize(seq)]
+            # if len(value) > 0:
+            vectorized_seqs.append(value)
 
         seq_lengths = torch.LongTensor(list(map(len, vectorized_seqs)))
-        # labels = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, data['polarity'])))
+
+        labels = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, data['polarity'])))
         labels = torch.LongTensor(data['polarity'])
 
         LOGGER.debug("Adding padding")
