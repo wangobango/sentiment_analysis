@@ -31,7 +31,7 @@ np.set_printoptions(threshold=sys.maxsize)
     Params start
 """
 set_count = 100000
-epochs = 1
+epochs = 40
 counter = 0
 learning_rate = 0.0001
 weight_decay = 0.005
