@@ -251,7 +251,10 @@ if __name__ == "__main__":
 
         LOGGER.debug("Reading data")
         if("-train" in sys.argv):
-            data = pd.read_csv(conf.readValue("processed_data_set"), sep=";", skiprows=int(dupa*chunk_size), nrows = chunk_size, names=['id', 'embedding', 'polarity'] )
+            if(dupa != 0):
+                data = pd.read_csv(conf.readValue("processed_data_set"), sep=";", skiprows=int(dupa*chunk_size), nrows = chunk_size, names=['id', 'embedding', 'polarity'] )
+            else:
+                data = pd.read_csv(conf.readValue("processed_data_set"), sep=";", skiprows=int(dupa*chunk_size), nrows = chunk_size)
             # data = data[:set_count]
             
             data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
