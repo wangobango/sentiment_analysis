@@ -24,12 +24,13 @@ from utils.preprocessor import Preprocessor
 TOKENIZER = RegexpTokenizer(r'\w+')
 LOGGER = logging.getLogger('lstm_model')
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+np.set_printoptions(threshold=sys.maxsize)
 
 """
     Params start
 """
 set_count = 100000
-epochs = 40
+epochs = 1
 counter = 0
 learning_rate = 0.0001
 weight_decay = 0.005
@@ -247,7 +248,7 @@ if __name__ == "__main__":
         if("-gpu" in sys.argv):
             model.cuda(device)
 
-    for dupa in range(7):
+    for dupa in range(4,7):
 
         LOGGER.debug("Reading data")
         if("-train" in sys.argv):
@@ -330,11 +331,12 @@ if __name__ == "__main__":
                     pb.print_progress_bar(counter)
                     counter += 1
                         
-                    subset_input_tensor = subset_input_tensor.to(device)
-                    subset_input_lengths = subset_input_lengths.to(device)
-                    subset_labels_tensor = subset_labels_tensor.to(device)
-            
                     try:
+                        subset_input_tensor = subset_input_tensor.to(device)
+                        subset_input_lengths = subset_input_lengths.to(device)
+                        subset_labels_tensor = subset_labels_tensor.to(device)
+            
+                    
                         output = model(subset_input_tensor, subset_input_lengths)
                     except RuntimeError as ex:
                         print(counter)
