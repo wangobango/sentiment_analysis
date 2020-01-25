@@ -41,7 +41,7 @@ embedding_dim = 150
 hidden_dim = 300
 output_size = 1
 n_layers = 2
-batch_size = 20
+batch_size = 50
 
 class DataSampler(object):
     
@@ -52,7 +52,7 @@ class DataSampler(object):
         self.batch_size = batch_size
         self.sequence_length = 2665
 
-        self.sampler = splr.BatchSampler(splr.RandomSampler(self.labels_tensor), self.batch_size, False)
+        self.sampler = splr.BatchSampler(splr.SequentialSampler(self.labels_tensor), self.batch_size, False)
         self.sampler_iter = iter(self.sampler)
 
     def __iter__(self):
@@ -347,6 +347,11 @@ if __name__ == "__main__":
                         print(subset_input_tensor_tmp)
                         print(subset_input_lengths_tmp)
                         print(subset_labels_tensor_tmp)
+                        torch.save(model.state_dict(), conf.readValue("lstm_model_path"))
+                        LOGGER.debug("Model serialized")
+                        model = PolarityGRU(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+                        model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
+                        model.cuda(device)
                         continue
                         
                     loss = criterion(output, subset_labels_tensor.float())
