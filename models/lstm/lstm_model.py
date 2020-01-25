@@ -354,6 +354,7 @@ if __name__ == "__main__":
                     pb.print_progress_bar(counter)
                     counter += 1
                     if(counter in excluded_batches):
+                        counter +=1
                         continue
                         
                     subset_input_tensor = subset_input_tensor.to(device)
