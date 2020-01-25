@@ -1,3 +1,4 @@
+CUDA_LAUNCH_BLOCKING="1"
 import torch.utils.data.sampler as splr
 import numpy as np
 import pandas as pd
@@ -344,6 +345,7 @@ if __name__ == "__main__":
                         print(subset_input_tensor_tmp)
                         print(subset_input_lengths_tmp)
                         print(subset_labels_tensor_tmp)
+                        torch.cuda.empty_cache()
                         continue
                         
                     loss = criterion(output, subset_labels_tensor.float())
