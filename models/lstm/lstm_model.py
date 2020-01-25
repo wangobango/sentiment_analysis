@@ -226,6 +226,7 @@ def add_excluded_batch(number):
 def get_excluded_batches():
     f = open("./excluded_batches.txt", "r")
     tmp = f.read()
+    if
     batches = tmp.split(",")
     batches_as_int = []
     for i in batches[:-1]:
@@ -276,7 +277,7 @@ if __name__ == "__main__":
 
             excluded_batches = get_excluded_batches()
             for b in excluded_batches:
-                data = data[b*batch_size : (b+1) * batch_size]
+                data = data.drop(data.index[b*batch_size:(b+1)*batch_size])
 
             # data = data[data['embedding'] != ':']
         LOGGER.debug("offset: " + str(dupa*chunk_size))
