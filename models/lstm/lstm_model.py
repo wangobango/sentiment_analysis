@@ -29,7 +29,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     Params start
 """
 set_count = 100000
-epochs = 1
+epochs = 40
 counter = 0
 learning_rate = 0.0001
 weight_decay = 0.005
@@ -258,7 +258,7 @@ if __name__ == "__main__":
             # data = data[:set_count]
             
             data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
-
+        LOGGER.debug("offset: " + str(dupa*chunk_size))
         # elif("-test" in sys.argv):
         test_data = pd.read_csv(conf.readValue("processed_test_set"), sep=";")
         test_data = test_data[:int(0.3*set_count)]
@@ -293,14 +293,14 @@ if __name__ == "__main__":
         """
             Params end
         """
-        # accuracy_array = []
-        # fscore_array = []
-        # precision_array = []
-        # recall_array = []
-        # test_accuracy_array = []
-        # loss_array = []
-        # time_array = []
-        # start_time = time.time()
+        accuracy_array = []
+        fscore_array = []
+        precision_array = []
+        recall_array = []
+        test_accuracy_array = []
+        loss_array = []
+        time_array = []
+        start_time = time.time()
         if("-train" in sys.argv):
             # if("-gru" in sys.argv):
             #     LOGGER.debug("training GRU model")
