@@ -37,8 +37,8 @@ learning_rate = 0.0001
 weight_decay = 0.005
 momentum = 0.9
 clip = 5
-embedding_dim = 50
-hidden_dim = 70
+embedding_dim = 25
+hidden_dim = 50
 output_size = 1
 n_layers = 2
 batch_size = 50
@@ -275,8 +275,8 @@ if __name__ == "__main__":
             data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
 
             excluded_batches = get_excluded_batches()
-            for b in excluded_batches:
-                data = data.drop(data.index[b*batch_size:(b+1)*batch_size])
+            # for b in excluded_batches:
+            #     data = data.drop(data.index[b*batch_size:(b+1)*batch_size])
 
             # data = data[data['embedding'] != ':']
         LOGGER.debug("offset: " + str(dupa*chunk_size))
@@ -353,6 +353,8 @@ if __name__ == "__main__":
                     subset_input_tensor_tmp, subset_input_lengths_tmp, subset_labels_tensor_tmp = subset_input_tensor, subset_input_lengths, subset_labels_tensor
                     pb.print_progress_bar(counter)
                     counter += 1
+                    if(counter in excluded_batches):
+                        continue
                         
                     subset_input_tensor = subset_input_tensor.to(device)
                     subset_input_lengths = subset_input_lengths.to(device)
