@@ -355,7 +355,7 @@ if __name__ == "__main__":
                     counter += 1
 
                     if(counter % 1000 == 0):
-                        model.cuda.empty_cache()
+                        torch.cuda.empty_cache()
 
                     if(counter in excluded_batches):
                         counter +=1
