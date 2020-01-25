@@ -190,8 +190,14 @@ def test(test_data, labels):
 
     LOGGER.debug("Evaluation in progress")
 
+    torch.cuda.empty_cache()
+
     for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(test_generator):
         pb.print_progress_bar(counter)
+
+        if(counter % 1000 == 0):
+            torch.cuda.empty_cache()
+
 
         subset_input_tensor = subset_input_tensor.to(device)
         subset_input_lengths = subset_input_lengths.to(device)
