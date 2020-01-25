@@ -345,7 +345,7 @@ if __name__ == "__main__":
                         print(subset_input_tensor_tmp)
                         print(subset_input_lengths_tmp)
                         print(subset_labels_tensor_tmp)
-                        torch.cuda.empty_cache()
+                        model.cuda(device)
                         continue
                         
                     loss = criterion(output, subset_labels_tensor.float())
