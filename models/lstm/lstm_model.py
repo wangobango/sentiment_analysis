@@ -37,8 +37,8 @@ learning_rate = 0.0001
 weight_decay = 0.005
 momentum = 0.9
 clip = 5
-embedding_dim = 150
-hidden_dim = 300
+embedding_dim = 50
+hidden_dim = 70
 output_size = 1
 n_layers = 2
 batch_size = 50
@@ -218,6 +218,20 @@ def test(test_data, labels):
     
     return evaluator.evaluate(labels, outputs)
 
+def add_excluded_batch(number):
+    f = open("./excluded_batches.txt", "a")
+    f.write(str(number) + ",")
+    f.close()
+
+def get_excluded_batches():
+    f = open("./excluded_batches.txt", "r")
+    tmp = f.read()
+    batches = tmp.split(",")
+    batches_as_int = []
+    for i in batches[:-1]:
+        batches_as_int.append(int(i))
+    return batches_as_int
+
 
 if __name__ == "__main__":
     if "--log" in sys.argv:
@@ -259,6 +273,11 @@ if __name__ == "__main__":
             # data = data[:set_count]
             
             data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+
+            excluded_batches = get_excluded_batches()
+            for b in excluded_batches:
+                data = data[b*batch_size : (b+1) * batch_size]
+
             # data = data[data['embedding'] != ':']
         LOGGER.debug("offset: " + str(dupa*chunk_size))
         # elif("-test" in sys.argv):
@@ -347,12 +366,15 @@ if __name__ == "__main__":
                         print(subset_input_tensor_tmp)
                         print(subset_input_lengths_tmp)
                         print(subset_labels_tensor_tmp)
-                        torch.save(model.state_dict(), conf.readValue("lstm_model_path"))
-                        LOGGER.debug("Model serialized")
-                        model = PolarityGRU(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
-                        model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
-                        model.cuda(device)
-                        model.train()
+                        add_excluded_batch(counter)
+                        # torch.save(model.state_dict(), conf.readValue("lstm_model_path"))
+                        # with open(conf.readValue("lstm_model_path"), "wb") as file:
+                        #     pickle.dump(model, file)
+                        # LOGGER.debug("Model serialized")
+                        # model = PolarityGRU(embedding_dim, vocab_size, hidden_dim, output_size, n_layers)
+                        # model.load_state_dict(torch.load(conf.readValue("lstm_model_path")))
+                        # model.cuda(device)
+                        # model.train()
                         continue
                         
                     loss = criterion(output, subset_labels_tensor.float())
