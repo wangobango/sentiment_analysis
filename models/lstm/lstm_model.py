@@ -29,7 +29,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     Params start
 """
 set_count = 100000
-epochs = 60
+epochs = 40
 counter = 0
 learning_rate = 0.0001
 weight_decay = 0.005
@@ -290,14 +290,14 @@ if __name__ == "__main__":
         """
             Params end
         """
-        accuracy_array = []
-        fscore_array = []
-        precision_array = []
-        recall_array = []
-        test_accuracy_array = []
-        loss_array = []
-        time_array = []
-        start_time = time.time()
+        # accuracy_array = []
+        # fscore_array = []
+        # precision_array = []
+        # recall_array = []
+        # test_accuracy_array = []
+        # loss_array = []
+        # time_array = []
+        # start_time = time.time()
         if("-train" in sys.argv):
             # if("-gru" in sys.argv):
             #     LOGGER.debug("training GRU model")
@@ -392,7 +392,7 @@ if __name__ == "__main__":
             df.plot(x ='Epoch', y='Recall', kind = 'line', color='yellow', ax=ax)
             df.plot(x ='Epoch', y='Test set accuracy', kind = 'line', color='purple', ax=ax)
             df.plot(x ='Epoch', y='Loss', kind = 'line', color='brown', ax=ax)
-            plt.savefig('./accuracy_train_epochs.png')
+            plt.savefig('./accuracy_train_epochs_' + str(dupa) + '.png')
 
 
 
