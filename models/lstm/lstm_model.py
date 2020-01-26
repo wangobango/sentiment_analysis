@@ -197,6 +197,9 @@ def test(test_data, labels):
 
         if(counter % 1000 == 0):
             torch.cuda.empty_cache()
+        if(counter in excluded_batches):
+                    counter +=1
+                    continue
 
 
         subset_input_tensor = subset_input_tensor.to(device)
@@ -212,6 +215,7 @@ def test(test_data, labels):
             output = model(subset_input_tensor, subset_input_lengths)
         except RuntimeError as ex:
             print(counter)
+            add_excluded_batch(counter)
             print(ex)
             print(subset_input_tensor)
             print(subset_input_lengths)
@@ -349,6 +353,7 @@ if __name__ == "__main__":
             pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
             model.train()
             for e in range(epochs):
+                torch.cuda.empty_cache()
                 LOGGER.debug("Epoch {}/{}".format(e, epochs))
                 counter = 0
                 correct = []
