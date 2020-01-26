@@ -163,7 +163,7 @@ class PolarityLSTM(nn.Module):
 def criterion(out, label):
     return functional.binary_cross_entropy(out, label)
 
-def test(test_data, labels):
+def test(seq_tensor_test, seq_lengths_test, labels_test, batch_size):
     # with open(conf.readValue("lstm_model_path"), "rb") as file:
     #     model = pickle.load(file)
     if("-gru" in sys.argv):
@@ -180,7 +180,7 @@ def test(test_data, labels):
 
     pb = ProgressBar(total=int(len(test_data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
 
-    test_generator = DataSampler(seq_tensor, seq_lengths, labels, batch_size)
+    test_generator = DataSampler(seq_tensor_test, seq_lengths_test, labels_test, batch_size)
     model.eval()
     evaluator = Evaluator()
 
@@ -322,6 +322,33 @@ if __name__ == "__main__":
 
         LOGGER.debug("Model created")
 
+        vocab_size_test = vocabulary.getVocabLength()
+        vocab_to_int_test = vocabulary.getVocab2int()
+        vectorized_seqs_test = []
+
+        # if("-train" in sys.argv or "-test" in sys.argv):
+
+        LOGGER.debug("Vectorization and tokenization Testset")
+        for seq in test_data['embedding']:
+            value = [vocab_to_int_test.get(word,1) for word in TOKENIZER.tokenize(seq)]
+            if len(value) > 0:
+                vectorized_seqs_test.append(value)
+            else:
+                vectorized_seqs_test.append([1])
+
+        seq_lengths_test = torch.LongTensor(list(map(len, vectorized_seqs)))
+
+
+        labels_test = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, test_data['polarity'])))
+        labels_test = torch.LongTensor(test_data['polarity'])
+
+        LOGGER.debug("Adding padding")
+        seq_tensor_test = Variable(torch.zeros((len(vectorized_seqs_test), seq_lengths_test.max()))).long()
+        for idx, (seq, seqlen) in enumerate(zip(vectorized_seqs_test, seq_lengths_test)):
+            seq_tensor_test[idx, :seqlen] = torch.LongTensor(seq)
+
+        LOGGER.debug("Model created")
+
 
 
         """
@@ -352,7 +379,7 @@ if __name__ == "__main__":
             LOGGER.debug("Training on set of size: {}".format(len(data['embedding'])))
             pb = ProgressBar(total=int(len(data['embedding'])-1/batch_size),prefix='Training in progress', suffix='', decimals=3, length=50, fill='X', zfill='-')
             model.train()
-            for e in range(epochs):
+            for e in range(1,epochs+1):
                 torch.cuda.empty_cache()
                 LOGGER.debug("Epoch {}/{}".format(e, epochs))
                 counter = 0
@@ -420,7 +447,7 @@ if __name__ == "__main__":
                 LOGGER.debug("Steps taken: {}".format(counter))
 
                 torch.save(model.state_dict(), conf.readValue("lstm_model_path"))
-                metrics = test(test_data, labels)
+                metrics = test(seq_tensor_test, seq_lengths_test, labels_test, batch_size)
 
                 # model.train()
 
@@ -434,7 +461,7 @@ if __name__ == "__main__":
                 start_time = time.time()
 
 
-                d = {'Epoch' : range(1,epochs +1), 'Accuracy' : accuracy_array, 'f-score' : fscore_array, 'Loss' : loss_array,
+                d = {'Epoch' : range(1,e +1), 'Accuracy' : accuracy_array, 'f-score' : fscore_array, 'Loss' : loss_array,
                     'Precision' : precision_array, 'Recall': recall_array, 'Test set accuracy': test_accuracy_array, 'Learning time': time_array}
                 df = pd.DataFrame(d,columns=['Epoch','Accuracy', 'f-score', 'Precision', 'Recall', 'Test set accuracy', 'Loss', 'Learning time'])
                 df.to_csv('./metrics_epochs.csv', sep = ';')
