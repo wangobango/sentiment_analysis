@@ -336,7 +336,7 @@ if __name__ == "__main__":
             else:
                 vectorized_seqs_test.append([1])
 
-        seq_lengths_test = torch.LongTensor(list(map(len, vectorized_seqs)))
+        seq_lengths_test = torch.LongTensor(list(map(len, vectorized_seqs_test)))
 
 
         labels_test = torch.LongTensor(list(map(lambda x: 1 if x == 'positive' else 0, test_data['polarity'])))
