@@ -37,8 +37,8 @@ learning_rate = 0.0001
 weight_decay = 0.005
 momentum = 0.9
 clip = 5
-embedding_dim = 25
-hidden_dim = 50
+embedding_dim = 150
+hidden_dim = 300
 output_size = 1
 n_layers = 2
 batch_size = 50
@@ -195,7 +195,7 @@ def test(test_data, labels):
     for subset_input_tensor, subset_input_lengths, subset_labels_tensor in iter(test_generator):
         pb.print_progress_bar(counter)
 
-        if(counter % 1000 == 0):
+        if(counter % 500 == 0):
             torch.cuda.empty_cache()
         if(counter in excluded_batches):
                     counter +=1
@@ -365,7 +365,7 @@ if __name__ == "__main__":
                     pb.print_progress_bar(counter)
                     counter += 1
 
-                    if(counter % 1000 == 0):
+                    if(counter % 500 == 0):
                         torch.cuda.empty_cache()
 
                     if(counter in excluded_batches):
@@ -433,16 +433,19 @@ if __name__ == "__main__":
                 time_array.append(time.time() - start_time)
                 start_time = time.time()
 
+
+                d = {'Epoch' : range(1,epochs +1), 'Accuracy' : accuracy_array, 'f-score' : fscore_array, 'Loss' : loss_array,
+                    'Precision' : precision_array, 'Recall': recall_array, 'Test set accuracy': test_accuracy_array, 'Learning time': time_array}
+                df = pd.DataFrame(d,columns=['Epoch','Accuracy', 'f-score', 'Precision', 'Recall', 'Test set accuracy', 'Loss', 'Learning time'])
+                df.to_csv('./metrics_epochs.csv', sep = ';')
+
             LOGGER.debug("Training finished")
             # f = open('./accuracy_train_epochs.txt', 'w')
             # for i, a in enumerate(accuracy_array):
             #     f.write(str(i) + " " + str(a) + "\n" )
             # f.close()
 
-            d = {'Epoch' : range(1,epochs +1), 'Accuracy' : accuracy_array, 'f-score' : fscore_array, 'Loss' : loss_array,
-                    'Precision' : precision_array, 'Recall': recall_array, 'Test set accuracy': test_accuracy_array, 'Learning time': time_array}
-            df = pd.DataFrame(d,columns=['Epoch','Accuracy', 'f-score', 'Precision', 'Recall', 'Test set accuracy', 'Loss', 'Learning time'])
-            df.to_csv('./metrics_epochs.csv', sep = ';')
+            
             ax = plt.gca()
             df.plot(x ='Epoch', y='Accuracy', kind = 'line', color='red', ax=ax)
             df.plot(x ='Epoch', y='f-score', kind = 'line', color='green', ax=ax)
