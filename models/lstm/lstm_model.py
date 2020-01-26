@@ -288,7 +288,7 @@ if __name__ == "__main__":
         LOGGER.debug("offset: " + str(dupa*chunk_size))
         # elif("-test" in sys.argv):
         test_data = pd.read_csv(conf.readValue("processed_test_set"), sep=";")
-        test_data = test_data[:int(0.5*set_count)]
+        test_data = test_data[:int(0.3*set_count)]
         test_data.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
 
         vocab_size = vocabulary.getVocabLength()
