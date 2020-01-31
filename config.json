@@ -5,10 +5,10 @@
   "data_set_path": "./data_set/data_set.csv",
   "test_set_fraction": 0.3,
   "CURRENT_DATA": "./data/Amazon_Instant_Video/Amazon_Instant_Video.neg.0.xml",
-  "results_path": "./results.json",
+  "results_path": "resources/results.json",
   "plot_path": "./plots/",
-  "word_polarity_counting_model": "./baselines/wpcm",
-  "regression_model": "regressionModel.pickle",
+  "word_polarity_counting_model": "resources/baselines/wpcm",
+  "regression_model": "resources/regressionModel.pickle",
   "domains": [
     "Books",
     "Movies_TV",
@@ -33,8 +33,8 @@
   ],
   "processed_data_set":"processed/data_set.csv",
   "processed_test_set":"processed/test_set.csv",
-  "lstm_model_path":"lstm.state",
+  "lstm_model_path":"resources/lstm.state",
   "processed":"./processed/",
-  "vocabulary":"vocabulary.pickl",
-  "results_dict":"results.pickl"
+  "vocabulary":"resources/vocabulary.pickl",
+  "results_dict":"resources/results.pickl"
 }

@@ -1,5 +1,6 @@
 from sklearn import metrics
 import numpy as np
+import pandas as pd
 
 class Evaluator:
     # 0,0 TN
@@ -12,7 +13,7 @@ class Evaluator:
     ACCURACY = 'accuracy'
     C_MATRIX = 'confusion-matrix'
 
-    def evaluate(self, expectedResults, actualResults):
+    def evaluate(self, expectedResults, actualResults, printConfusionMatrix = False):
         evaluatedMetircs = {}
         confusionMatrix = self.calculate_confusion_matrix(expectedResults, actualResults)
         # evaluatedMetircs[self.C_MATRIX] = confusionMatrix.flatten()
@@ -54,6 +55,7 @@ class Evaluator:
         self.tn = confusionMatrix[0][0]
         self.fn = confusionMatrix[1][0]
         self.fp = confusionMatrix[0][1]
+        self.confusionMatrix = confusionMatrix
         return confusionMatrix
 
     def getString(self, evaluatedMetrics): 
